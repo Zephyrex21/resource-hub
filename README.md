@@ -5,18 +5,24 @@
 - ✅ **Phase 0 — Foundation:** themed React client (light/dark, glass/clay, canvas particles) +
   Express/MongoDB backend with a health check.
 - ✅ **Phase 1 — Data + API:** Note, Tip, and Project models; full CRUD REST API; real seed data.
-- ⏳ **Phase 2 — up next:** public-facing pages (Notes hub + detail w/ PDF viewer, Tips hub,
-  Projects grid).
+- ✅ **Phase 2 — Public pages:** Notes hub + in-browser PDF viewer, Tips hub + rendered
+  Markdown with syntax highlighting, Projects grid.
+- ⏳ **Phase 3 — up next:** global (⌘K) search across all content types + protected admin
+  upload panel.
 
 ## What's in the project so far
 
-- `client/` — React + Vite + TypeScript + Tailwind, theme system, canvas particle background
+- `client/` — React + Vite + TypeScript + Tailwind
+  - Theme system (light/dark, glass/clay), canvas particle background
+  - Pages: `/` (home), `/notes` + `/notes/:slug` (with PDF viewer), `/tips` + `/tips/:slug`
+    (with rendered Markdown), `/projects`
+  - `public/sample-note.pdf` — a local test PDF the first seeded note points to, so the
+    viewer is testable without needing real file storage yet
 - `server/` — Express + Mongoose:
   - `/api/v1/health` — status + DB connection check
   - `/api/v1/notes`, `/api/v1/tips`, `/api/v1/projects` — full CRUD + filtering + search
   - `/api/v1/meta` — taxonomy (subjects/categories/statuses) for building filter UIs
-  - `npm run seed` — populates the DB with real starter content (your actual GitHub projects,
-    plus starter Notes/Tips covering the subjects from the blueprint)
+  - `npm run seed` — populates the DB with real starter content
 
 **Note on write routes:** `POST` / `PUT` / `DELETE` are open (no auth) for now — that's
 intentional, Phase 3 adds the protected admin panel. Don't deploy this publicly as-is yet.
@@ -137,6 +143,27 @@ curl -X POST http://localhost:5000/api/v1/tips \
 ```
 You should get back `201` with the created tip, including an auto-generated `slug`.
 
+## 6. Walk through the actual pages (Phase 2)
+
+With both `server` (seeded) and `client` running:
+
+1. Open `http://localhost:5173` — Home now shows three link cards (Notes / Tips / Projects),
+   each in its own accent color.
+2. **Notes** (`/notes`) — you should see 4 note cards with subject filter chips at the top.
+   Click **DBMS Fundamentals** — this one has a real local PDF wired up, so you should see an
+   actual in-browser PDF preview (2 pages, with Prev/Next controls), not just a download link.
+   The other 3 notes will show "Preview isn't available" (expected — they still point at
+   placeholder URLs until you upload real files in Phase 3) but the **Download** button, tags,
+   and difficulty badge should all render correctly.
+3. **Tips** (`/tips`) — click **Install & Configure Docker on Ubuntu**. You should see properly
+   rendered Markdown with dark, syntax-highlighted code blocks (not raw `##` symbols or
+   unstyled text).
+4. **Projects** (`/projects`) — all 6 of your real projects should appear, each with a working
+   **GitHub** button; only the ones with a live URL (Vision Interpretability Studio,
+   AllowOrigin) should show a **Live** button.
+5. Toggle dark/light from the navbar and re-check all four pages — this is a good moment to
+   catch any low-contrast text before it becomes a habit.
+
 ## Troubleshooting
 
 - **Status pill says "Backend offline"** — make sure the server is running on port 5000 and
@@ -153,8 +180,8 @@ Everything here is free: Vite/React/Tailwind/Express/Mongoose are open-source np
 and MongoDB Atlas's M0 tier is free forever (512MB storage, no card required). No paid
 services are used anywhere so far.
 
-## Next: Phase 2
+## Next: Phase 3
 
-Public-facing pages that actually render this data — Notes hub with subject filters, a
-detail page with an in-browser PDF viewer, a Tips hub rendering the Markdown content with
-syntax-highlighted code blocks, and a Projects grid using your real GitHub/live links.
+Global ⌘K search across Notes/Tips/Projects at once, and a protected `/admin` panel (JWT
+login) so you can add real content — including real file uploads — through a form instead of
+editing the seed script by hand.

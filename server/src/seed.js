@@ -21,7 +21,10 @@ const notes = [
     tags: ['dbms', 'normalization', 'sql'],
     description:
       'Core relational database concepts: ER diagrams, normal forms (1NF–BCNF), and keys — condensed for quick revision.',
-    fileUrl: 'https://example.com/notes/dbms-fundamentals.pdf',
+    // Local test file (served by the client's Vite dev server at :5173) so the
+    // in-browser PDF viewer is actually testable end-to-end in Phase 2.
+    // Swap for a real Supabase Storage / Cloudinary URL once uploads exist (Phase 3).
+    fileUrl: 'http://localhost:5173/sample-note.pdf',
     fileType: 'pdf',
     difficulty: 'beginner',
   },

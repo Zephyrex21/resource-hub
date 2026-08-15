@@ -1,3 +1,5 @@
+@import 'highlight.js/styles/atom-one-dark.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,10 +11,10 @@
   --color-text-muted: #5b5f6d;
   --color-border: rgba(20, 20, 26, 0.08);
 
-  --color-accent: #7c5cfc;
-  --color-accent-notes: #7c5cfc;
-  --color-accent-tips: #f5a623;
-  --color-accent-projects: #22b8b0;
+  --color-accent: 124 92 252;
+  --color-accent-notes: 124 92 252;
+  --color-accent-tips: 245 166 35;
+  --color-accent-projects: 34 184 176;
 
   --glass-bg: rgba(255, 255, 255, 0.6);
   --glass-border: rgba(255, 255, 255, 0.5);
@@ -30,10 +32,10 @@
   --color-text-muted: #9a9ca8;
   --color-border: rgba(255, 255, 255, 0.08);
 
-  --color-accent: #9b82ff;
-  --color-accent-notes: #9b82ff;
-  --color-accent-tips: #ffc266;
-  --color-accent-projects: #4fd8ce;
+  --color-accent: 155 130 255;
+  --color-accent-notes: 155 130 255;
+  --color-accent-tips: 255 194 102;
+  --color-accent-projects: 79 216 206;
 
   --glass-bg: rgba(20, 22, 29, 0.55);
   --glass-border: rgba(255, 255, 255, 0.08);
@@ -65,5 +67,41 @@ body {
   .clay-btn {
     background: var(--color-surface);
     box-shadow: var(--clay-shadow);
+  }
+
+  /* Rendered Markdown (Tips content) */
+  .prose-content h2 {
+    @apply mt-6 mb-3 font-display text-xl font-semibold first:mt-0;
+  }
+  .prose-content h3 {
+    @apply mt-5 mb-2 font-display text-lg font-semibold;
+  }
+  .prose-content p {
+    @apply mb-4 leading-relaxed text-text;
+  }
+  .prose-content ul {
+    @apply mb-4 list-disc space-y-1 pl-5;
+  }
+  .prose-content ol {
+    @apply mb-4 list-decimal space-y-1 pl-5;
+  }
+  .prose-content a {
+    @apply text-accent underline underline-offset-2;
+  }
+  .prose-content code {
+    @apply rounded bg-border px-1.5 py-0.5 font-mono text-[0.85em];
+  }
+  .prose-content pre {
+    @apply mb-4 overflow-x-auto rounded-xl bg-[#0d1117] p-4;
+  }
+  .prose-content pre code {
+    @apply bg-transparent p-0 font-mono text-[0.85em] text-inherit;
+  }
+  .prose-content table {
+    @apply mb-4 w-full border-collapse text-sm;
+  }
+  .prose-content th,
+  .prose-content td {
+    @apply border border-border px-3 py-2 text-left;
   }
 }
