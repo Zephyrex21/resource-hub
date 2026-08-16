@@ -56,6 +56,16 @@ export interface Meta {
   difficulties: string[]
 }
 
+export interface AdminSession {
+  email: string
+}
+
+export interface SearchResults {
+  notes: Note[]
+  tips: Tip[]
+  projects: Project[]
+}
+
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api/v1'
 
 function buildQuery(params?: Record<string, string | undefined>): string {
@@ -67,15 +77,21 @@ function buildQuery(params?: Record<string, string | undefined>): string {
   return `?${new URLSearchParams(entries).toString()}`
 }
 
-async function request<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`)
+async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const res = await fetch(`${API_URL}${path}`, { credentials: 'include', ...options })
   if (!res.ok) {
     const body = await res.json().catch(() => ({}) as { error?: string })
     throw new Error(body.error || `Request failed: ${res.status}`)
   }
+  if (res.status === 204) return undefined as T
   return res.json() as Promise<T>
 }
 
+function jsonBody(data: unknown): RequestInit {
+  return { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }
+}
+
+// --- Reads ---
 export const getHealth = () => request<HealthResponse>('/health')
 export const getMeta = () => request<Meta>('/meta')
 
@@ -90,3 +106,46 @@ export const getTipBySlug = (slug: string) => request<Tip>(`/tips/${slug}`)
 export const getProjects = (params?: { status?: string; featured?: string; search?: string }) =>
   request<Project[]>(`/projects${buildQuery(params)}`)
 export const getProjectBySlug = (slug: string) => request<Project>(`/projects/${slug}`)
+
+export const search = (q: string) => request<SearchResults>(`/search${buildQuery({ q })}`)
+
+// --- Auth ---
+export const login = (email: string, password: string) =>
+  request<AdminSession>('/auth/login', { method: 'POST', ...jsonBody({ email, password }) })
+export const logout = () => request<void>('/auth/logout', { method: 'POST' })
+export const getMe = () => request<AdminSession>('/auth/me')
+
+// --- Writes (admin only) ---
+export const createNote = (data: Partial<Note>) =>
+  request<Note>('/notes', { method: 'POST', ...jsonBody(data) })
+export const updateNote = (id: string, data: Partial<Note>) =>
+  request<Note>(`/notes/${id}`, { method: 'PUT', ...jsonBody(data) })
+export const deleteNote = (id: string) => request<void>(`/notes/${id}`, { method: 'DELETE' })
+
+export const createTip = (data: Partial<Tip>) =>
+  request<Tip>('/tips', { method: 'POST', ...jsonBody(data) })
+export const updateTip = (id: string, data: Partial<Tip>) =>
+  request<Tip>(`/tips/${id}`, { method: 'PUT', ...jsonBody(data) })
+export const deleteTip = (id: string) => request<void>(`/tips/${id}`, { method: 'DELETE' })
+
+export const createProject = (data: Partial<Project>) =>
+  request<Project>('/projects', { method: 'POST', ...jsonBody(data) })
+export const updateProject = (id: string, data: Partial<Project>) =>
+  request<Project>(`/projects/${id}`, { method: 'PUT', ...jsonBody(data) })
+export const deleteProject = (id: string) => request<void>(`/projects/${id}`, { method: 'DELETE' })
+
+// File upload — multipart, so it bypasses the JSON `request` helper.
+export async function uploadFile(file: File): Promise<{ url: string }> {
+  const formData = new FormData()
+  formData.append('file', file)
+  const res = await fetch(`${API_URL}/upload`, {
+    method: 'POST',
+    credentials: 'include',
+    body: formData,
+  })
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}) as { error?: string })
+    throw new Error(body.error || `Upload failed: ${res.status}`)
+  }
+  return res.json()
+}

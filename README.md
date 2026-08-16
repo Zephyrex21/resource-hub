@@ -7,25 +7,24 @@
 - ✅ **Phase 1 — Data + API:** Note, Tip, and Project models; full CRUD REST API; real seed data.
 - ✅ **Phase 2 — Public pages:** Notes hub + in-browser PDF viewer, Tips hub + rendered
   Markdown with syntax highlighting, Projects grid.
-- ⏳ **Phase 3 — up next:** global (⌘K) search across all content types + protected admin
-  upload panel.
+- ✅ **Phase 3 — Search + Admin:** ⌘K command palette across all content, JWT admin login,
+  and a full admin panel (add/edit/delete + real file upload) for Notes/Tips/Projects.
+- ⏳ **Phase 4 — up next:** polish pass — motion, empty states, responsive + accessibility QA.
 
 ## What's in the project so far
 
 - `client/` — React + Vite + TypeScript + Tailwind
   - Theme system (light/dark, glass/clay), canvas particle background
-  - Pages: `/` (home), `/notes` + `/notes/:slug` (with PDF viewer), `/tips` + `/tips/:slug`
-    (with rendered Markdown), `/projects`
-  - `public/sample-note.pdf` — a local test PDF the first seeded note points to, so the
-    viewer is testable without needing real file storage yet
+  - Public pages: `/`, `/notes` + `/notes/:slug`, `/tips` + `/tips/:slug`, `/projects`
+  - `/admin/login` and protected `/admin` — add/edit/delete Notes, Tips, and Projects, with
+    file upload or paste-a-URL for Notes/Tips
+  - ⌘K (or Ctrl+K) opens a global search palette across all three content types
 - `server/` — Express + Mongoose:
-  - `/api/v1/health` — status + DB connection check
-  - `/api/v1/notes`, `/api/v1/tips`, `/api/v1/projects` — full CRUD + filtering + search
-  - `/api/v1/meta` — taxonomy (subjects/categories/statuses) for building filter UIs
-  - `npm run seed` — populates the DB with real starter content
-
-**Note on write routes:** `POST` / `PUT` / `DELETE` are open (no auth) for now — that's
-intentional, Phase 3 adds the protected admin panel. Don't deploy this publicly as-is yet.
+  - `/api/v1/health`, `/notes`, `/tips`, `/projects`, `/meta` (from earlier phases)
+  - `/api/v1/auth/login`, `/logout`, `/me` — JWT session via httpOnly cookie
+  - `/api/v1/upload` — protected file upload (Supabase Storage)
+  - `/api/v1/search?q=` — combined text search across Notes/Tips/Projects
+  - `POST`/`PUT`/`DELETE` on notes/tips/projects now require admin auth
 
 ## Prerequisites
 
@@ -164,6 +163,58 @@ With both `server` (seeded) and `client` running:
 5. Toggle dark/light from the navbar and re-check all four pages — this is a good moment to
    catch any low-contrast text before it becomes a habit.
 
+## 7. Set up admin access (Phase 3)
+
+Add these to `server/.env`:
+
+```bash
+JWT_SECRET=any-long-random-string-you-make-up
+ADMIN_EMAIL=you@example.com
+```
+
+Then generate your password hash — from `server/`:
+
+```bash
+npm run hash-password -- "yourChosenPassword"
+```
+
+Copy the printed `ADMIN_PASSWORD_HASH=...` line into `server/.env`, then restart the server.
+
+**Optional — real file uploads.** By default the admin panel's "Upload file" mode will show a
+clear error ("File storage is not configured…") until you connect free storage. "Paste URL"
+mode works either way, so you can skip this and come back to it later:
+
+1. Create a free project at [supabase.com](https://supabase.com/dashboard) (no card required).
+2. In your project, go to **Storage** → create a new bucket (e.g. `resource-hub-files`) and
+   mark it **Public**.
+3. Go to **Project Settings → API**, copy the **Project URL** and the **service_role** key.
+4. Add to `server/.env`:
+   ```bash
+   SUPABASE_URL=https://xxxxx.supabase.co
+   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+   SUPABASE_BUCKET=resource-hub-files
+   ```
+5. Restart the server. "Upload file" mode in the admin panel will now work.
+
+## 8. Test the admin panel
+
+1. Go to `http://localhost:5173/admin` — you should be redirected to `/admin/login` (this
+   proves the route is actually protected, not just hidden from the nav).
+2. Log in with the email/password you set above.
+3. Try each tab (Notes / Tips / Projects): add a test item, confirm it appears in the list on
+   the right, edit it, then delete it. Each action should update the list immediately.
+4. Go to `/notes` in a normal (non-admin) tab and confirm a newly added note actually shows up
+   there — proves the public pages and admin panel share the same database, not separate data.
+5. Log out from the admin panel, then try visiting `/admin` directly again — you should be
+   bounced back to the login page.
+
+## 9. Test global search
+
+From any page, press **⌘K** (Mac) or **Ctrl+K** (Windows/Linux), or click the **Search** pill
+in the navbar. Type "docker" — you should see the Docker tip appear under a "Tips" group.
+Type "dbms" — the DBMS note should appear under "Notes". Click a result to navigate straight
+to it, and confirm **Esc** closes the palette.
+
 ## Troubleshooting
 
 - **Status pill says "Backend offline"** — make sure the server is running on port 5000 and
@@ -173,15 +224,19 @@ With both `server` (seeded) and `client` running:
   your IP is allowed under Network Access in Atlas.
 - **CORS error in the browser console** — confirm `server/.env`'s `CLIENT_ORIGIN` matches the
   client's actual URL (`http://localhost:5173` by default).
+- **Logged in but immediately bounced back to `/admin/login`** — check that `JWT_SECRET` is
+  set in `server/.env` and that you restarted the server after editing it.
+- **"Admin credentials are not configured" on login** — you're missing `ADMIN_EMAIL` or
+  `ADMIN_PASSWORD_HASH` in `server/.env`, or forgot to restart the server after adding them.
 
 ## Cost check
 
-Everything here is free: Vite/React/Tailwind/Express/Mongoose are open-source npm packages,
-and MongoDB Atlas's M0 tier is free forever (512MB storage, no card required). No paid
-services are used anywhere so far.
+Everything here is free: Vite/React/Tailwind/Express/Mongoose/bcryptjs/jsonwebtoken/multer are
+open-source npm packages, MongoDB Atlas's M0 tier is free forever, and Supabase Storage's free
+tier (1GB storage) needs no credit card. No paid services anywhere.
 
-## Next: Phase 3
+## Next: Phase 4
 
-Global ⌘K search across Notes/Tips/Projects at once, and a protected `/admin` panel (JWT
-login) so you can add real content — including real file uploads — through a form instead of
-editing the seed script by hand.
+A polish pass: Framer Motion transitions between pages, better empty/loading states, a full
+responsive pass on mobile, and an accessibility check (contrast, focus states, reduced motion)
+across both themes.

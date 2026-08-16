@@ -11,6 +11,9 @@ export function errorHandler(err, req, res, next) {
   if (err.code === 11000) {
     return res.status(409).json({ error: 'A record with that slug already exists.' })
   }
+  if (err.name === 'MulterError') {
+    return res.status(400).json({ error: err.message })
+  }
 
   const status = err.status || 500
   res.status(status).json({ error: err.message || 'Internal server error' })
