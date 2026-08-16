@@ -8,7 +8,9 @@
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
     "seed": "node src/seed.js",
-    "hash-password": "node src/utils/hashPassword.js"
+    "hash-password": "node src/utils/hashPassword.js",
+    "import-notes": "node src/scripts/importNotes.js",
+    "import-notes:dry-run": "node src/scripts/importNotes.js --dry-run"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",

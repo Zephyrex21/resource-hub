@@ -2,6 +2,13 @@
 
 ## Recent updates (post-Phase 5)
 
+- **Bulk note import tool** — `npm run import-notes` uploads a folder of local
+  files to Supabase Storage and creates their Note records in one command,
+  instead of manually using the admin panel for each file. Comes pre-loaded
+  with 5 real notes (Docker, LLM Fundamentals, LLM Security, RAG/CAG/MAG,
+  React) in `server/import/`. A `--dry-run` mode validates everything
+  (file reads, schema, slugs) without touching Supabase or the database —
+  useful for checking a new batch before committing to the real upload.
 - **Shorter note subjects** — `Operating Systems` → `OS`, `Web Dev (MERN)` → `Web Dev`,
   `AI/ML` → separate `AI` and `ML` tags, `LLMs & RAG` → `LLMs`, `CS Electives` → `Electives`.
   Fixes the filter-chip row wrapping to two lines. **Re-run `npm run seed`** after pulling
@@ -327,6 +334,41 @@ instead of localhost:
 - Check the browser console for CORS or cookie errors — if login succeeds but `/admin`
   immediately kicks you back to login, it's almost always the `CLIENT_ORIGIN` mismatch from
   step D.
+
+## 12. Bulk-import real notes
+
+For adding several notes at once (rather than one-by-one through the admin panel):
+
+1. Drop your files into `server/import/files/`.
+2. Add one entry per file to `server/import/manifest.json`:
+   ```json
+   {
+     "file": "my-notes.pdf",
+     "title": "My Notes Title",
+     "subject": "DSA",
+     "tags": ["dsa", "arrays"],
+     "description": "One or two sentences describing what's in it.",
+     "difficulty": "beginner"
+   }
+   ```
+   `subject` must exactly match one of the values from `GET /api/v1/meta` (`DSA`, `DBMS`,
+   `OS`, `Web Dev`, `AI`, `ML`, `LLMs`, `System Design`, `DevOps`, `Electives`).
+3. Sanity-check it first, with no risk to your real data:
+   ```bash
+   npm run import-notes:dry-run
+   ```
+   This reads every file and validates every manifest entry against the real schema —
+   catches typos in `subject`, missing fields, etc. — without uploading anything or
+   touching the database.
+4. Once that's clean, run it for real:
+   ```bash
+   npm run import-notes
+   ```
+
+This repo already includes 5 real notes in `server/import/files/` + a filled-in
+`manifest.json` — Docker fundamentals, LLM engineering/inference, LLM security issues,
+a RAG vs CAG vs MAG comparison, and a full React beginner-to-advanced set. Run the two
+commands above and they'll appear on `/notes` for real, PDF viewer and all.
 
 ## Troubleshooting
 
