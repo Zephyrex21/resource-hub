@@ -66,6 +66,12 @@ export interface SearchResults {
   projects: Project[]
 }
 
+export interface Stats {
+  notes: number
+  tips: number
+  projects: number
+}
+
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api/v1'
 
 function buildQuery(params?: Record<string, string | undefined>): string {
@@ -108,6 +114,7 @@ export const getProjects = (params?: { status?: string; featured?: string; searc
 export const getProjectBySlug = (slug: string) => request<Project>(`/projects/${slug}`)
 
 export const search = (q: string) => request<SearchResults>(`/search${buildQuery({ q })}`)
+export const getStats = () => request<Stats>('/stats')
 
 // --- Auth ---
 export const login = (email: string, password: string) =>

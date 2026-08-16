@@ -1,5 +1,19 @@
 # Resource Hub
 
+## Recent updates (post-Phase 5)
+
+- **Shorter note subjects** — `Operating Systems` → `OS`, `Web Dev (MERN)` → `Web Dev`,
+  `AI/ML` → separate `AI` and `ML` tags, `LLMs & RAG` → `LLMs`, `CS Electives` → `Electives`.
+  Fixes the filter-chip row wrapping to two lines. **Re-run `npm run seed`** after pulling
+  this — the old subject strings no longer match the schema's enum.
+- **Homepage redesign** — a real two-column hero (headline + CTA buttons on the left, an
+  original SVG illustration on the right showing the three connected Notes/Tips/Projects
+  cards), a real stats strip pulled from `/api/v1/stats` (actual counts, not made-up
+  numbers), and scroll-reveal animation on the sections below the fold as you scroll down.
+- **Richer footer** — quick links, real social icons (GitHub/LinkedIn/LeetCode/Instagram),
+  and a copyright line, replacing the old one-line credit text.
+- New `/api/v1/stats` endpoint (`{ notes, tips, projects }` counts) powering the homepage.
+
 ## Progress
 
 - ✅ **Phase 0 — Foundation:** themed React client (light/dark, glass/clay, canvas particles) +

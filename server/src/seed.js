@@ -31,7 +31,7 @@ const notes = [
   {
     title: 'Operating Systems — Process Scheduling & Deadlocks',
     slug: 'os-process-scheduling-deadlocks',
-    subject: 'Operating Systems',
+    subject: 'OS',
     tags: ['os', 'scheduling', 'deadlock'],
     description:
       "Scheduling algorithms (FCFS, SJF, Round Robin), deadlock conditions, and a Banker's Algorithm walkthrough.",
@@ -42,7 +42,7 @@ const notes = [
   {
     title: 'LLMs & RAG — How Retrieval-Augmented Generation Works',
     slug: 'llms-rag-how-it-works',
-    subject: 'LLMs & RAG',
+    subject: 'LLMs',
     tags: ['llm', 'rag', 'embeddings', 'vector-db'],
     description:
       'Chunking, embeddings, vector search, and the retrieval-then-generate pipeline — plus common failure modes.',

@@ -1,13 +1,14 @@
 export const NOTE_SUBJECTS = [
-  'DBMS',
-  'Operating Systems',
   'DSA',
+  'DBMS',
+  'OS',
+  'Web Dev',
+  'AI',
+  'ML',
+  'LLMs',
   'System Design',
-  'Web Dev (MERN)',
-  'AI/ML',
-  'LLMs & RAG',
   'DevOps',
-  'CS Electives',
+  'Electives',
 ]
 
 export const TIP_CATEGORIES = [
