@@ -5,6 +5,7 @@ import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 import { getNoteBySlug } from '../lib/api'
 import { useAsync } from '../hooks/useAsync'
+import { useContainerWidth } from '../hooks/useContainerWidth'
 import { GlassCard, ClayCard } from '../components/ui/Card'
 import { Tag } from '../components/ui/Tag'
 import { Loading, ErrorState } from '../components/ui/StateViews'
@@ -18,6 +19,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 export default function NoteDetail() {
   const { slug } = useParams<{ slug: string }>()
   const { data: note, loading, error, refetch } = useAsync(() => getNoteBySlug(slug!), [slug])
+  const { ref: viewerRef, width: viewerWidth } = useContainerWidth<HTMLDivElement>(640)
 
   const [numPages, setNumPages] = useState<number | null>(null)
   const [pageNumber, setPageNumber] = useState(1)
@@ -60,14 +62,16 @@ export default function NoteDetail() {
 
       {note.fileType === 'pdf' && !pdfError && (
         <ClayCard className="flex flex-col items-center gap-4 overflow-hidden px-4 py-6">
-          <Document
-            file={note.fileUrl}
-            onLoadSuccess={({ numPages }) => setNumPages(numPages)}
-            onLoadError={() => setPdfError(true)}
-            loading={<Loading label="Loading preview…" />}
-          >
-            <Page pageNumber={pageNumber} width={640} />
-          </Document>
+          <div ref={viewerRef} className="w-full max-w-[640px]">
+            <Document
+              file={note.fileUrl}
+              onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+              onLoadError={() => setPdfError(true)}
+              loading={<Loading label="Loading preview…" />}
+            >
+              {viewerWidth > 0 && <Page pageNumber={pageNumber} width={viewerWidth} />}
+            </Document>
+          </div>
 
           {numPages && numPages > 1 && (
             <div className="flex items-center gap-4 text-sm">

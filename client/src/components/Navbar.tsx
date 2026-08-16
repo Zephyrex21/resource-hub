@@ -13,18 +13,18 @@ interface NavbarProps {
 
 export default function Navbar({ onSearchClick }: NavbarProps) {
   return (
-    <header className="glass-card fixed left-1/2 top-4 z-10 flex w-[min(94%,920px)] -translate-x-1/2 items-center justify-between gap-3 rounded-2xl px-5 py-3">
-      <NavLink to="/" className="font-display text-lg font-semibold text-text">
+    <header className="glass-card fixed left-1/2 top-3 z-10 flex w-[min(95%,920px)] -translate-x-1/2 items-center justify-between gap-1 rounded-2xl px-3 py-2.5 sm:top-4 sm:gap-3 sm:px-5 sm:py-3">
+      <NavLink to="/" className="shrink-0 font-display text-base font-semibold text-text sm:text-lg">
         Resource Hub
       </NavLink>
 
-      <nav className="flex items-center gap-1 sm:gap-2">
+      <nav className="flex items-center gap-0.5 sm:gap-2">
         {links.map((link) => (
           <NavLink
             key={link.to}
             to={link.to}
             className={({ isActive }) =>
-              `rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+              `rounded-full px-2 py-1.5 text-xs font-medium transition-colors sm:px-3 sm:text-sm ${
                 isActive ? 'text-accent' : 'text-muted hover:text-text'
               }`
             }
@@ -34,9 +34,10 @@ export default function Navbar({ onSearchClick }: NavbarProps) {
         ))}
       </nav>
 
-      <div className="flex items-center gap-2">
+      <div className="flex shrink-0 items-center gap-2">
         <button
           onClick={onSearchClick}
+          aria-label="Open search"
           className="clay-btn hidden items-center gap-2 rounded-full px-3 py-1.5 text-xs text-muted sm:flex"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -45,6 +46,16 @@ export default function Navbar({ onSearchClick }: NavbarProps) {
           </svg>
           <span>Search</span>
           <kbd className="rounded bg-border px-1.5 py-0.5 text-[10px]">⌘K</kbd>
+        </button>
+        <button
+          onClick={onSearchClick}
+          aria-label="Open search"
+          className="clay-btn flex h-8 w-8 items-center justify-center rounded-full text-muted sm:hidden"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
         </button>
         <ThemeToggle />
       </div>

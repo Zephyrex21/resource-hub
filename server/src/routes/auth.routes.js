@@ -5,10 +5,17 @@ import { requireAdmin } from '../middleware/requireAdmin.js'
 
 const router = Router()
 
+const isProduction = process.env.NODE_ENV === 'production'
+
 const COOKIE_OPTS = {
   httpOnly: true,
-  sameSite: 'lax',
-  secure: process.env.NODE_ENV === 'production',
+  // In dev, client and server share a site (different localhost ports) so
+  // 'lax' works fine. In production they're on different domains entirely
+  // (e.g. vercel.app + onrender.com), which requires 'none' — and browsers
+  // only accept sameSite:'none' when secure:true (HTTPS), which both
+  // Vercel and Render provide by default.
+  sameSite: isProduction ? 'none' : 'lax',
+  secure: isProduction,
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
 }
 

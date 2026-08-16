@@ -9,22 +9,21 @@
   Markdown with syntax highlighting, Projects grid.
 - ✅ **Phase 3 — Search + Admin:** ⌘K command palette across all content, JWT admin login,
   and a full admin panel (add/edit/delete + real file upload) for Notes/Tips/Projects.
-- ⏳ **Phase 4 — up next:** polish pass — motion, empty states, responsive + accessibility QA.
+- ✅ **Phase 4 — Polish:** page transitions, card stagger animations, mobile navbar fix,
+  responsive PDF viewer, WCAG contrast fixes, keyboard focus indicators, code-splitting.
+- ✅ **Phase 5 — Deploy:** production-ready CORS/cookie config, Vercel + Render setup,
+  MongoDB Atlas network access — all on free tiers, no card required anywhere.
 
 ## What's in the project so far
 
-- `client/` — React + Vite + TypeScript + Tailwind
-  - Theme system (light/dark, glass/clay), canvas particle background
-  - Public pages: `/`, `/notes` + `/notes/:slug`, `/tips` + `/tips/:slug`, `/projects`
-  - `/admin/login` and protected `/admin` — add/edit/delete Notes, Tips, and Projects, with
-    file upload or paste-a-URL for Notes/Tips
-  - ⌘K (or Ctrl+K) opens a global search palette across all three content types
-- `server/` — Express + Mongoose:
-  - `/api/v1/health`, `/notes`, `/tips`, `/projects`, `/meta` (from earlier phases)
-  - `/api/v1/auth/login`, `/logout`, `/me` — JWT session via httpOnly cookie
-  - `/api/v1/upload` — protected file upload (Supabase Storage)
-  - `/api/v1/search?q=` — combined text search across Notes/Tips/Projects
-  - `POST`/`PUT`/`DELETE` on notes/tips/projects now require admin auth
+- `client/` — React + Vite + TypeScript + Tailwind (see Phases 0–4 above for details)
+  - `vercel.json` — SPA rewrite so client-side routing works on Vercel
+- `server/` — Express + Mongoose (see Phases 0–3 above for details)
+  - CORS now supports a comma-separated `CLIENT_ORIGIN` list (prod + local at once)
+  - Admin session cookie automatically switches to `sameSite:none; secure:true` when
+    `NODE_ENV=production`, required once client and server live on different domains
+- `render.yaml` — optional one-click Render Blueprint for the API (manual dashboard setup
+  is documented too, and is the simpler path if this is your first deploy)
 
 ## Prerequisites
 
@@ -215,6 +214,106 @@ in the navbar. Type "docker" — you should see the Docker tip appear under a "T
 Type "dbms" — the DBMS note should appear under "Notes". Click a result to navigate straight
 to it, and confirm **Esc** closes the palette.
 
+## 10. Check the polish pass (Phase 4)
+
+A few specific things to verify, since these were real issues I found and fixed while
+building this phase — worth confirming they actually landed:
+
+- **Contrast:** the Tips (amber) and Projects (teal) tag colors are noticeably darker/more
+  muted in light mode than earlier phases. That's intentional — the original bright versions
+  failed WCAG AA contrast as text (as low as 1.88:1 against the background, well under the
+  4.5:1 minimum). Dark mode was already fine and is unchanged.
+- **Keyboard navigation:** click into the page first, then **Tab** through the Notes hub
+  (search box → filter chips → cards). Every focused element should show a clearly visible
+  outline — inputs and glass/clay buttons previously had no visible focus ring at all.
+- **Mobile width:** resize the browser to ~375px wide (or open dev tools' device toolbar).
+  The navbar should stay on one line without overlapping — search collapses to an icon-only
+  button below the `sm` breakpoint.
+- **PDF viewer on narrow screens:** open the DBMS note at a narrow width — the PDF page should
+  resize to fit the screen instead of overflowing horizontally (it was previously a fixed
+  640px regardless of viewport).
+- **Motion:** navigating between pages should have a subtle fade/slide; note/tip/project cards
+  should animate in with a slight stagger on load. If your OS has "reduce motion" turned on,
+  all of this should be instant instead — that's automatic, not a bug.
+- **Bundle size:** the Notes/Tips detail pages and the admin panel are now code-split, so
+  `npm run build` no longer warns about an oversized main bundle.
+
+## 11. Deploy for real (Phase 5)
+
+Both platforms below have genuine free tiers with no credit card required — I checked their
+current 2026 pricing before writing this. Two things worth knowing going in:
+
+- **Render's free web service sleeps after 15 minutes of inactivity.** The first request
+  after a quiet period takes 30–60 seconds to wake up. That's normal, not broken — refresh
+  and it'll load fully within a minute.
+- **Vercel's free Hobby tier is personal/non-commercial use only.** Fine for a portfolio
+  project like this; if you ever monetize it, you'd need to upgrade.
+
+You'll need this pushed to a GitHub repo first, since both platforms deploy from Git.
+
+### A. MongoDB Atlas (already done in Phase 0)
+
+Nothing new here — your existing free M0 cluster works as-is. Just confirm Network Access
+still has `0.0.0.0/0` allowed, since Render's free tier doesn't offer a static outbound IP
+you could whitelist more narrowly instead.
+
+### B. Deploy the API to Render
+
+1. Go to [render.com](https://render.com), sign up (no card needed), connect your GitHub.
+2. **New → Web Service** → pick this repo.
+3. Set **Root Directory** to `server`.
+4. Runtime: **Node**. Build command: `npm install`. Start command: `npm start`.
+5. Instance type: **Free**.
+6. Add every environment variable from `server/.env.example` under **Environment** — same
+   values as your local `.env`, plus:
+   ```
+   NODE_ENV=production
+   ```
+   (Leave `CLIENT_ORIGIN` for a moment — you'll set it after step C, once you know your
+   Vercel URL.)
+7. Deploy. Once live, note the URL Render gives you (e.g. `https://resource-hub-api.onrender.com`).
+8. Confirm it works: visit `https://your-render-url.onrender.com/api/v1/health` — you should
+   see the same JSON you saw locally.
+
+*(Alternative: `render.yaml` in the repo root lets you do this as one Blueprint deploy instead
+of the manual steps above — see the comment at the top of that file.)*
+
+### C. Deploy the client to Vercel
+
+1. Go to [vercel.com](https://vercel.com), sign up (no card needed), import this repo.
+2. Set **Root Directory** to `client`. Framework preset should auto-detect as **Vite**.
+3. Add an environment variable:
+   ```
+   VITE_API_URL=https://your-render-url.onrender.com/api/v1
+   ```
+   (your actual Render URL from step B, plus `/api/v1`)
+4. Deploy. Vercel gives you a URL like `https://your-app.vercel.app`.
+
+### D. Connect them
+
+Back in Render, set the `CLIENT_ORIGIN` env var to your actual Vercel URL:
+```
+CLIENT_ORIGIN=https://your-app.vercel.app
+```
+Save — Render will redeploy automatically. This is the step people most often forget, and
+it's the one that makes login/admin work at all in production (CORS blocks everything until
+this matches exactly, including `https://` and no trailing slash).
+
+### E. Full production smoke test
+
+Repeat the same checklist from sections 6, 8, and 9 above, but against your live Vercel URL
+instead of localhost:
+- All four public pages render with real data
+- The DBMS note's PDF viewer works (⚠️ it's still pointed at `localhost:5173/sample-note.pdf`
+  from the seed script — re-seed with a real Supabase-hosted file, or add a new note through
+  the admin panel, once you're live)
+- ⌘K search works
+- `/admin/login` → log in → add/edit/delete an item → confirm it shows on the public page
+- Log out, try `/admin` directly, confirm you're bounced to login
+- Check the browser console for CORS or cookie errors — if login succeeds but `/admin`
+  immediately kicks you back to login, it's almost always the `CLIENT_ORIGIN` mismatch from
+  step D.
+
 ## Troubleshooting
 
 - **Status pill says "Backend offline"** — make sure the server is running on port 5000 and
@@ -231,12 +330,14 @@ to it, and confirm **Esc** closes the palette.
 
 ## Cost check
 
-Everything here is free: Vite/React/Tailwind/Express/Mongoose/bcryptjs/jsonwebtoken/multer are
-open-source npm packages, MongoDB Atlas's M0 tier is free forever, and Supabase Storage's free
-tier (1GB storage) needs no credit card. No paid services anywhere.
+Everything here is free: all npm packages are open-source, MongoDB Atlas's M0 tier is free
+forever, Supabase Storage's free tier needs no card, and — confirmed as of writing this
+phase — both Render's and Vercel's free tiers remain genuinely free with no card required in
+2026. The only caveats: Render free services cold-start after inactivity, and Vercel Hobby is
+for non-commercial use.
 
-## Next: Phase 4
+## What's next
 
-A polish pass: Framer Motion transitions between pages, better empty/loading states, a full
-responsive pass on mobile, and an accessibility check (contrast, focus states, reduced motion)
-across both themes.
+All five planned phases are done — you have a deployed, working, first-party resource hub.
+From here it's about content: adding real Notes/Tips (swap the seed data's placeholder URLs
+for real uploads via the admin panel) and keeping the Projects list current as you ship more.

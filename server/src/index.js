@@ -15,11 +15,28 @@ import { notFound, errorHandler } from './middleware/errorHandler.js'
 
 const app = express()
 const PORT = process.env.PORT || 5000
-const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173'
+
+// Supports a comma-separated list so production + a local dev origin can both
+// work at once, e.g. CLIENT_ORIGIN=https://myapp.vercel.app,http://localhost:5173
+const ALLOWED_ORIGINS = (process.env.CLIENT_ORIGIN || 'http://localhost:5173')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean)
 
 // `credentials: true` is required so the admin session cookie survives
-// cross-port requests between the Vite dev server and this API in dev.
-app.use(cors({ origin: CLIENT_ORIGIN, credentials: true }))
+// cross-origin requests between the client and this API (different ports in
+// dev, different domains in production).
+app.use(
+  cors({
+    origin(origin, callback) {
+      // Allow non-browser requests (curl, health checks, server-to-server)
+      // which don't send an Origin header at all.
+      if (!origin || ALLOWED_ORIGINS.includes(origin)) return callback(null, true)
+      callback(new Error(`Origin ${origin} is not allowed by CORS`))
+    },
+    credentials: true,
+  }),
+)
 app.use(express.json())
 app.use(cookieParser())
 

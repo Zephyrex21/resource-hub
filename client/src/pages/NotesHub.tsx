@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { getNotes, getMeta } from '../lib/api'
 import { useAsync } from '../hooks/useAsync'
 import { GlassCard } from '../components/ui/Card'
@@ -7,6 +8,7 @@ import { Tag } from '../components/ui/Tag'
 import { SearchInput } from '../components/ui/SearchInput'
 import { FilterChips } from '../components/ui/FilterChips'
 import { Loading, ErrorState, EmptyState } from '../components/ui/StateViews'
+import { containerVariants, itemVariants } from '../components/motionVariants'
 
 export default function NotesHub() {
   const [subject, setSubject] = useState('')
@@ -39,18 +41,25 @@ export default function NotesHub() {
       )}
 
       {!loading && !error && notes && notes.length > 0 && (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+          className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+        >
           {notes.map((note) => (
-            <Link key={note._id} to={`/notes/${note.slug}`}>
-              <GlassCard className="flex h-full flex-col gap-3 px-5 py-6 transition-transform hover:-translate-y-1">
-                <Tag variant="notes">{note.subject}</Tag>
-                <h2 className="font-display text-lg font-semibold leading-snug">{note.title}</h2>
-                <p className="line-clamp-3 text-sm text-muted">{note.description}</p>
-                <span className="mt-auto text-xs font-medium text-accent-notes">Read note →</span>
-              </GlassCard>
-            </Link>
+            <motion.div key={note._id} variants={itemVariants}>
+              <Link to={`/notes/${note.slug}`}>
+                <GlassCard className="flex h-full flex-col gap-3 px-5 py-6 transition-transform hover:-translate-y-1">
+                  <Tag variant="notes">{note.subject}</Tag>
+                  <h2 className="font-display text-lg font-semibold leading-snug">{note.title}</h2>
+                  <p className="line-clamp-3 text-sm text-muted">{note.description}</p>
+                  <span className="mt-auto text-xs font-medium text-accent-notes">Read note →</span>
+                </GlassCard>
+              </Link>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
     </div>
   )

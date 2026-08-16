@@ -54,6 +54,9 @@ export default function CommandPalette({ open, onOpenChange }: Props) {
     <div
       className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 px-4 pt-24"
       onClick={() => onOpenChange(false)}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Search"
     >
       <div className="glass-card w-full max-w-xl rounded-2xl p-2" onClick={(e) => e.stopPropagation()}>
         <input
@@ -61,6 +64,7 @@ export default function CommandPalette({ open, onOpenChange }: Props) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search notes, tips, projects…"
+          aria-label="Search notes, tips, and projects"
           className="w-full bg-transparent px-4 py-3 text-sm outline-none placeholder:text-muted"
         />
 

@@ -11,10 +11,10 @@
   --color-text-muted: #5b5f6d;
   --color-border: rgba(20, 20, 26, 0.08);
 
-  --color-accent: 124 92 252;
-  --color-accent-notes: 124 92 252;
-  --color-accent-tips: 245 166 35;
-  --color-accent-projects: 34 184 176;
+  --color-accent: 101 75 206;
+  --color-accent-notes: 101 75 206;
+  --color-accent-tips: 142 96 20;
+  --color-accent-projects: 21 114 109;
 
   --glass-bg: rgba(255, 255, 255, 0.6);
   --glass-border: rgba(255, 255, 255, 0.5);
@@ -104,4 +104,14 @@ body {
   .prose-content td {
     @apply border border-border px-3 py-2 text-left;
   }
+}
+
+/* Keyboard focus indicators — many interactive elements use outline-none for
+   the custom glass/clay look, which otherwise strips focus visibility for
+   keyboard users. This restores it (mouse clicks are unaffected, since
+   :focus-visible only fires for keyboard/programmatic focus in modern browsers). */
+:focus-visible {
+  outline: 2px solid rgb(var(--color-accent));
+  outline-offset: 2px;
+  border-radius: 4px;
 }

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { getTips, getMeta } from '../lib/api'
 import { useAsync } from '../hooks/useAsync'
 import { GlassCard } from '../components/ui/Card'
@@ -7,6 +8,7 @@ import { Tag } from '../components/ui/Tag'
 import { SearchInput } from '../components/ui/SearchInput'
 import { FilterChips } from '../components/ui/FilterChips'
 import { Loading, ErrorState, EmptyState } from '../components/ui/StateViews'
+import { containerVariants, itemVariants } from '../components/motionVariants'
 
 export default function TipsHub() {
   const [category, setCategory] = useState('')
@@ -39,18 +41,25 @@ export default function TipsHub() {
       )}
 
       {!loading && !error && tips && tips.length > 0 && (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+          className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+        >
           {tips.map((tip) => (
-            <Link key={tip._id} to={`/tips/${tip.slug}`}>
-              <GlassCard className="flex h-full flex-col gap-3 px-5 py-6 transition-transform hover:-translate-y-1">
-                <Tag variant="tips">{tip.category}</Tag>
-                <h2 className="font-display text-lg font-semibold leading-snug">{tip.title}</h2>
-                <p className="line-clamp-3 text-sm text-muted">{tip.summary}</p>
-                <span className="mt-auto text-xs font-medium text-accent-tips">Read guide →</span>
-              </GlassCard>
-            </Link>
+            <motion.div key={tip._id} variants={itemVariants}>
+              <Link to={`/tips/${tip.slug}`}>
+                <GlassCard className="flex h-full flex-col gap-3 px-5 py-6 transition-transform hover:-translate-y-1">
+                  <Tag variant="tips">{tip.category}</Tag>
+                  <h2 className="font-display text-lg font-semibold leading-snug">{tip.title}</h2>
+                  <p className="line-clamp-3 text-sm text-muted">{tip.summary}</p>
+                  <span className="mt-auto text-xs font-medium text-accent-tips">Read guide →</span>
+                </GlassCard>
+              </Link>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
     </div>
   )

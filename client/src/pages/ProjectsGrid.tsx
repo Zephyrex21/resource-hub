@@ -1,8 +1,10 @@
+import { motion } from 'framer-motion'
 import { getProjects } from '../lib/api'
 import { useAsync } from '../hooks/useAsync'
 import { GlassCard } from '../components/ui/Card'
 import { Tag } from '../components/ui/Tag'
 import { Loading, ErrorState, EmptyState } from '../components/ui/StateViews'
+import { containerVariants, itemVariants } from '../components/motionVariants'
 
 export default function ProjectsGrid() {
   const { data: projects, loading, error, refetch } = useAsync(() => getProjects(), [])
@@ -25,48 +27,55 @@ export default function ProjectsGrid() {
       )}
 
       {!loading && !error && sorted && sorted.length > 0 && (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+          className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+        >
           {sorted.map((project) => (
-            <GlassCard key={project._id} className="flex h-full flex-col gap-3 px-5 py-6">
-              <div className="flex items-center justify-between">
-                <Tag variant="projects">{project.status}</Tag>
-                {project.featured && <Tag variant="neutral">Featured</Tag>}
-              </div>
+            <motion.div key={project._id} variants={itemVariants}>
+              <GlassCard className="flex h-full flex-col gap-3 px-5 py-6">
+                <div className="flex items-center justify-between">
+                  <Tag variant="projects">{project.status}</Tag>
+                  {project.featured && <Tag variant="neutral">Featured</Tag>}
+                </div>
 
-              <h2 className="font-display text-lg font-semibold leading-snug">{project.title}</h2>
-              <p className="text-sm text-muted">{project.description}</p>
+                <h2 className="font-display text-lg font-semibold leading-snug">{project.title}</h2>
+                <p className="text-sm text-muted">{project.description}</p>
 
-              <div className="flex flex-wrap gap-1.5">
-                {project.techStack.map((tech) => (
-                  <span key={tech} className="rounded-full bg-border px-2.5 py-0.5 text-[11px] text-muted">
-                    {tech}
-                  </span>
-                ))}
-              </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {project.techStack.map((tech) => (
+                    <span key={tech} className="rounded-full bg-border px-2.5 py-0.5 text-[11px] text-muted">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
 
-              <div className="mt-auto flex gap-3 pt-2">
-                <a
-                  href={project.githubUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="clay-btn flex-1 rounded-full px-4 py-2 text-center text-sm font-medium text-text"
-                >
-                  GitHub
-                </a>
-                {project.liveUrl && (
+                <div className="mt-auto flex gap-3 pt-2">
                   <a
-                    href={project.liveUrl}
+                    href={project.githubUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex-1 rounded-full bg-accent-projects px-4 py-2 text-center text-sm font-medium text-white"
+                    className="clay-btn flex-1 rounded-full px-4 py-2 text-center text-sm font-medium text-text"
                   >
-                    Live
+                    GitHub
                   </a>
-                )}
-              </div>
-            </GlassCard>
+                  {project.liveUrl && (
+                    <a
+                      href={project.liveUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex-1 rounded-full bg-accent-projects px-4 py-2 text-center text-sm font-medium text-white"
+                    >
+                      Live
+                    </a>
+                  )}
+                </div>
+              </GlassCard>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
     </div>
   )

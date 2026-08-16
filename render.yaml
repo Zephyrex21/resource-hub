@@ -1,0 +1,34 @@
+# Optional Infrastructure-as-Code deploy for the API. Not required — you can
+# also just create the Web Service manually in the Render dashboard (see
+# README.md "Phase 5" for that walkthrough, which is the simpler mental model
+# if this is your first time deploying).
+#
+# To use this instead: Render dashboard -> New -> Blueprint -> point at this repo.
+services:
+  - type: web
+    name: resource-hub-api
+    runtime: node
+    rootDir: server
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: CLIENT_ORIGIN
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD_HASH
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_BUCKET
+        sync: false

@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { ClayCard, GlassCard } from '../components/ui/Card'
+import { containerVariants, itemVariants } from '../components/motionVariants'
 
 const sections = [
   {
@@ -36,17 +38,24 @@ export default function Home() {
         </p>
       </ClayCard>
 
-      <div className="grid w-full gap-5 sm:grid-cols-3">
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+        className="grid w-full gap-5 sm:grid-cols-3"
+      >
         {sections.map((s) => (
-          <Link key={s.to} to={s.to}>
-            <GlassCard className="h-full px-6 py-8 text-left transition-transform hover:-translate-y-1">
-              <span className={`inline-block h-2.5 w-2.5 rounded-full ${s.dot}`} />
-              <h2 className={`mt-3 font-display text-xl font-semibold ${s.accent}`}>{s.title}</h2>
-              <p className="mt-2 text-sm text-muted">{s.description}</p>
-            </GlassCard>
-          </Link>
+          <motion.div key={s.to} variants={itemVariants}>
+            <Link to={s.to}>
+              <GlassCard className="h-full px-6 py-8 text-left transition-transform hover:-translate-y-1">
+                <span className={`inline-block h-2.5 w-2.5 rounded-full ${s.dot}`} />
+                <h2 className={`mt-3 font-display text-xl font-semibold ${s.accent}`}>{s.title}</h2>
+                <p className="mt-2 text-sm text-muted">{s.description}</p>
+              </GlassCard>
+            </Link>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </div>
   )
 }
