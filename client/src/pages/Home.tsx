@@ -5,6 +5,7 @@ import { HeroIllustration } from '../components/HeroIllustration'
 import { getStats } from '../lib/api'
 import { useAsync } from '../hooks/useAsync'
 import { containerVariants, itemVariants } from '../components/motionVariants'
+import { usePageTitle } from '../hooks/usePageTitle'
 
 const sections = [
   {
@@ -31,6 +32,7 @@ const sections = [
 ]
 
 export default function Home() {
+  usePageTitle('Home')
   const { data: stats } = useAsync(getStats, [])
 
   const statItems = [

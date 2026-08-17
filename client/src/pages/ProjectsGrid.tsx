@@ -3,10 +3,13 @@ import { getProjects } from '../lib/api'
 import { useAsync } from '../hooks/useAsync'
 import { GlassCard } from '../components/ui/Card'
 import { Tag } from '../components/ui/Tag'
-import { Loading, ErrorState, EmptyState } from '../components/ui/StateViews'
+import { ErrorState, EmptyState } from '../components/ui/StateViews'
+import { SkeletonGrid } from '../components/ui/Skeleton'
 import { containerVariants, itemVariants } from '../components/motionVariants'
+import { usePageTitle } from '../hooks/usePageTitle'
 
 export default function ProjectsGrid() {
+  usePageTitle('Projects')
   const { data: projects, loading, error, refetch } = useAsync(() => getProjects(), [])
 
   const sorted = projects
@@ -20,7 +23,7 @@ export default function ProjectsGrid() {
         <p className="mt-1 text-sm text-muted">Real, shipped work — source and live demos.</p>
       </div>
 
-      {loading && <Loading label="Loading projects…" />}
+      {loading && <SkeletonGrid />}
       {error && <ErrorState message={error} onRetry={refetch} />}
       {!loading && !error && sorted && sorted.length === 0 && (
         <EmptyState message="No projects yet." />

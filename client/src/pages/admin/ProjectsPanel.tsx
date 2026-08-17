@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { getProjects, deleteProject } from '../../lib/api'
 import type { Project, Meta } from '../../lib/api'
 import { useAsync } from '../../hooks/useAsync'
+import { useToast } from '../../context/ToastContext'
 import { ProjectForm } from '../../components/admin/ProjectForm'
 import { AdminList } from '../../components/admin/AdminList'
 import { Loading, ErrorState } from '../../components/ui/StateViews'
@@ -9,15 +10,22 @@ import { Loading, ErrorState } from '../../components/ui/StateViews'
 export function ProjectsPanel({ meta }: { meta: Meta }) {
   const { data: projects, loading, error, refetch } = useAsync(() => getProjects(), [])
   const [editing, setEditing] = useState<Project | null>(null)
+  const { showToast } = useToast()
 
   async function handleDelete(id: string) {
-    await deleteProject(id)
-    refetch()
+    try {
+      await deleteProject(id)
+      refetch()
+      showToast('Project deleted')
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Delete failed', 'error')
+    }
   }
 
-  function handleSaved() {
+  function handleSaved(mode: 'created' | 'updated') {
     setEditing(null)
     refetch()
+    showToast(mode === 'created' ? 'Project added' : 'Project updated')
   }
 
   return (

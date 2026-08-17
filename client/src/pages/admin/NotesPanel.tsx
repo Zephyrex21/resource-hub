@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { getNotes, deleteNote } from '../../lib/api'
 import type { Note, Meta } from '../../lib/api'
 import { useAsync } from '../../hooks/useAsync'
+import { useToast } from '../../context/ToastContext'
 import { NoteForm } from '../../components/admin/NoteForm'
 import { AdminList } from '../../components/admin/AdminList'
 import { Loading, ErrorState } from '../../components/ui/StateViews'
@@ -9,15 +10,22 @@ import { Loading, ErrorState } from '../../components/ui/StateViews'
 export function NotesPanel({ meta }: { meta: Meta }) {
   const { data: notes, loading, error, refetch } = useAsync(() => getNotes(), [])
   const [editing, setEditing] = useState<Note | null>(null)
+  const { showToast } = useToast()
 
   async function handleDelete(id: string) {
-    await deleteNote(id)
-    refetch()
+    try {
+      await deleteNote(id)
+      refetch()
+      showToast('Note deleted')
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Delete failed', 'error')
+    }
   }
 
-  function handleSaved() {
+  function handleSaved(mode: 'created' | 'updated') {
     setEditing(null)
     refetch()
+    showToast(mode === 'created' ? 'Note added' : 'Note updated')
   }
 
   return (

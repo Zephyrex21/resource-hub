@@ -4,13 +4,16 @@ import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
 import { getTipBySlug } from '../lib/api'
 import { useAsync } from '../hooks/useAsync'
+import { usePageTitle } from '../hooks/usePageTitle'
 import { GlassCard } from '../components/ui/Card'
 import { Tag } from '../components/ui/Tag'
+import { CodeBlock } from '../components/CodeBlock'
 import { Loading, ErrorState } from '../components/ui/StateViews'
 
 export default function TipDetail() {
   const { slug } = useParams<{ slug: string }>()
   const { data: tip, loading, error, refetch } = useAsync(() => getTipBySlug(slug!), [slug])
+  usePageTitle(tip?.title ?? 'Tips & Tricks')
 
   if (loading) return <Loading label="Loading tip…" />
   if (error) return <ErrorState message={error} onRetry={refetch} />
@@ -40,7 +43,11 @@ export default function TipDetail() {
 
       {tip.contentMarkdown && (
         <GlassCard className="prose-content px-6 py-8">
-          <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeHighlight]}
+            components={{ pre: CodeBlock }}
+          >
             {tip.contentMarkdown}
           </ReactMarkdown>
         </GlassCard>

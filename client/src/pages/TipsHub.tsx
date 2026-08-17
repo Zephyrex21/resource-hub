@@ -7,10 +7,13 @@ import { GlassCard } from '../components/ui/Card'
 import { Tag } from '../components/ui/Tag'
 import { SearchInput } from '../components/ui/SearchInput'
 import { FilterChips } from '../components/ui/FilterChips'
-import { Loading, ErrorState, EmptyState } from '../components/ui/StateViews'
+import { ErrorState, EmptyState } from '../components/ui/StateViews'
+import { SkeletonGrid } from '../components/ui/Skeleton'
 import { containerVariants, itemVariants } from '../components/motionVariants'
+import { usePageTitle } from '../hooks/usePageTitle'
 
 export default function TipsHub() {
+  usePageTitle('Tips & Tricks')
   const [category, setCategory] = useState('')
   const [search, setSearch] = useState('')
 
@@ -34,7 +37,7 @@ export default function TipsHub() {
         </div>
       </div>
 
-      {loading && <Loading label="Loading tips…" />}
+      {loading && <SkeletonGrid />}
       {error && <ErrorState message={error} onRetry={refetch} />}
       {!loading && !error && tips && tips.length === 0 && (
         <EmptyState message="No tips match that filter yet." />

@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom'
 import { GlassCard } from '../components/ui/Card'
+import { usePageTitle } from '../hooks/usePageTitle'
 
 export default function NotFound() {
+  usePageTitle('Page not found')
   return (
     <div className="flex justify-center py-16">
       <GlassCard className="px-8 py-10 text-center">

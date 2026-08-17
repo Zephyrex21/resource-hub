@@ -2,6 +2,18 @@
 
 ## Recent updates (post-Phase 5)
 
+- **Finishing-touch polish:**
+  - Real favicon (matches the hero illustration's three-node motif) + Open Graph/Twitter
+    meta tags, so link previews actually look intentional when shared
+  - Per-page browser tab titles (e.g. "DBMS Fundamentals · Resource Hub" instead of
+    "Resource Hub" everywhere)
+  - Skeleton loading cards on Notes/Tips/Projects instead of a generic spinner — previews
+    the layout while data loads
+  - Toast notifications for admin actions (add/edit/delete/login) instead of silent updates
+  - Copy-to-clipboard button on Tip code blocks (hover to reveal)
+  - "More in [subject]" related-notes section on the Note detail page
+  - Zoom controls (70%–200%) on the PDF viewer — useful for the denser infographic-style
+    notes
 - **Bulk note import tool** — `npm run import-notes` uploads a folder of local
   files to Supabase Storage and creates their Note records in one command,
   instead of manually using the admin panel for each file. Comes pre-loaded

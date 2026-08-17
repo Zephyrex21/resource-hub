@@ -5,7 +5,7 @@ import type { Project, Meta } from '../../lib/api'
 interface Props {
   meta: Meta
   editing: Project | null
-  onSaved: () => void
+  onSaved: (mode: 'created' | 'updated') => void
   onCancelEdit: () => void
 }
 
@@ -60,7 +60,7 @@ export function ProjectForm({ meta, editing, onSaved, onCancelEdit }: Props) {
     try {
       if (editing) await api.updateProject(editing._id, payload)
       else await api.createProject(payload)
-      onSaved()
+      onSaved(editing ? 'updated' : 'created')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed')
     } finally {

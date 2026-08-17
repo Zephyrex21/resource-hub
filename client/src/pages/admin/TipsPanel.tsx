@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { getTips, deleteTip } from '../../lib/api'
 import type { Tip, Meta } from '../../lib/api'
 import { useAsync } from '../../hooks/useAsync'
+import { useToast } from '../../context/ToastContext'
 import { TipForm } from '../../components/admin/TipForm'
 import { AdminList } from '../../components/admin/AdminList'
 import { Loading, ErrorState } from '../../components/ui/StateViews'
@@ -9,15 +10,22 @@ import { Loading, ErrorState } from '../../components/ui/StateViews'
 export function TipsPanel({ meta }: { meta: Meta }) {
   const { data: tips, loading, error, refetch } = useAsync(() => getTips(), [])
   const [editing, setEditing] = useState<Tip | null>(null)
+  const { showToast } = useToast()
 
   async function handleDelete(id: string) {
-    await deleteTip(id)
-    refetch()
+    try {
+      await deleteTip(id)
+      refetch()
+      showToast('Tip deleted')
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Delete failed', 'error')
+    }
   }
 
-  function handleSaved() {
+  function handleSaved(mode: 'created' | 'updated') {
     setEditing(null)
     refetch()
+    showToast(mode === 'created' ? 'Tip added' : 'Tip updated')
   }
 
   return (

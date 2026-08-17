@@ -6,7 +6,7 @@ import { FileOrUrlInput } from './FileOrUrlInput'
 interface Props {
   meta: Meta
   editing: Tip | null
-  onSaved: () => void
+  onSaved: (mode: 'created' | 'updated') => void
   onCancelEdit: () => void
 }
 
@@ -62,7 +62,7 @@ export function TipForm({ meta, editing, onSaved, onCancelEdit }: Props) {
     try {
       if (editing) await api.updateTip(editing._id, payload)
       else await api.createTip(payload)
-      onSaved()
+      onSaved(editing ? 'updated' : 'created')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed')
     } finally {

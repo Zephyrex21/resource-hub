@@ -1,10 +1,14 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { useToast } from '../../context/ToastContext'
+import { usePageTitle } from '../../hooks/usePageTitle'
 import { ClayCard } from '../../components/ui/Card'
 
 export default function AdminLogin() {
+  usePageTitle('Admin Login')
   const { login } = useAuth()
+  const { showToast } = useToast()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -17,6 +21,7 @@ export default function AdminLogin() {
     setLoading(true)
     try {
       await login(email, password)
+      showToast('Welcome back')
       navigate('/admin')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed')

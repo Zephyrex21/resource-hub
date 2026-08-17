@@ -6,7 +6,7 @@ import { FileOrUrlInput } from './FileOrUrlInput'
 interface Props {
   meta: Meta
   editing: Note | null
-  onSaved: () => void
+  onSaved: (mode: 'created' | 'updated') => void
   onCancelEdit: () => void
 }
 
@@ -59,7 +59,7 @@ export function NoteForm({ meta, editing, onSaved, onCancelEdit }: Props) {
     try {
       if (editing) await api.updateNote(editing._id, payload)
       else await api.createNote(payload)
-      onSaved()
+      onSaved(editing ? 'updated' : 'created')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed')
     } finally {

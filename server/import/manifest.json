@@ -1,0 +1,42 @@
+[
+  {
+    "file": "Docker.pdf",
+    "title": "Docker — Fundamentals to Compose",
+    "subject": "DevOps",
+    "tags": ["docker", "containers", "devops", "compose"],
+    "description": "Docker from the ground up — what it is, Dockerfiles, image vs container, Docker Compose, and the 5 commands you actually need to get started.",
+    "difficulty": "beginner"
+  },
+  {
+    "file": "LLM-Basics.pdf",
+    "title": "LLM Engineering & Inference — Fundamentals",
+    "subject": "LLMs",
+    "tags": ["llm", "transformers", "attention", "inference", "tokenization"],
+    "description": "A 10-page walkthrough of how LLMs actually work under the hood — transformer architecture, attention (Q/K/V), tokenization, RoPE, and inference internals like prefill/decode, KV cache, and batching.",
+    "difficulty": "intermediate"
+  },
+  {
+    "file": "LLM-Security-Issues.pdf",
+    "title": "LLM Security Issues",
+    "subject": "LLMs",
+    "tags": ["llm", "security", "prompt-injection", "jailbreak", "rag"],
+    "description": "Why AI systems break in the real world — prompt injection, jailbreaks, data exfiltration, unsafe tool usage, and retrieval poisoning, with concrete examples of each.",
+    "difficulty": "intermediate"
+  },
+  {
+    "file": "RAG-CAG-MAG.pdf",
+    "title": "RAG vs CAG vs MAG — Structural Comparison",
+    "subject": "LLMs",
+    "tags": ["rag", "llm", "vector-db", "architecture"],
+    "description": "A side-by-side comparison of three context-augmentation strategies for LLMs — Retrieval-, Cache-, and Memory-Augmented Generation — covering latency, cost, scale, and when to deploy each.",
+    "difficulty": "advanced"
+  },
+  {
+    "file": "React.pdf",
+    "title": "React — Beginner to Advanced",
+    "subject": "Web Dev",
+    "tags": ["react", "hooks", "frontend", "javascript"],
+    "description": "Complete React notes from JSX and props through hooks, Context, routing, performance, and component patterns — with interview notes and common mistakes throughout.",
+    "difficulty": "beginner"
+  }
+]

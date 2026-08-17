@@ -3,4 +3,9 @@ dist/
 .env
 .DS_Store
 *.log
-import
+
+# Imported note files (PDFs/DOCs) are source material for the one-time
+# upload to Supabase Storage — they shouldn't live in git. manifest.json
+# stays tracked as a reusable template/record of what's been imported.
+server/import/files/*
+!server/import/files/.gitkeep

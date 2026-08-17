@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useAsync } from '../../hooks/useAsync'
+import { usePageTitle } from '../../hooks/usePageTitle'
 import { getMeta } from '../../lib/api'
 import { NotesPanel } from './NotesPanel'
 import { TipsPanel } from './TipsPanel'
@@ -11,6 +12,7 @@ const tabs = ['notes', 'tips', 'projects'] as const
 type Tab = (typeof tabs)[number]
 
 export default function AdminDashboard() {
+  usePageTitle('Admin')
   const { email, logout } = useAuth()
   const [tab, setTab] = useState<Tab>('notes')
   const { data: meta, loading, error, refetch } = useAsync(getMeta, [])
