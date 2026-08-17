@@ -5,6 +5,7 @@ const links = [
   { to: '/notes', label: 'Notes' },
   { to: '/tips', label: 'Tips' },
   { to: '/projects', label: 'Projects' },
+  { to: '/about', label: 'About', hideOnMobile: true },
 ]
 
 interface NavbarProps {
@@ -25,8 +26,8 @@ export default function Navbar({ onSearchClick }: NavbarProps) {
             to={link.to}
             className={({ isActive }) =>
               `rounded-full px-2 py-1.5 text-xs font-medium transition-colors sm:px-3 sm:text-sm ${
-                isActive ? 'text-accent' : 'text-muted hover:text-text'
-              }`
+                link.hideOnMobile ? 'hidden sm:inline-block' : ''
+              } ${isActive ? 'text-accent' : 'text-muted hover:text-text'}`
             }
           >
             {link.label}

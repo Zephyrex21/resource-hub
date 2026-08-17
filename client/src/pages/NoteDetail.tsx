@@ -3,12 +3,13 @@ import { useParams, Link } from 'react-router-dom'
 import { Document, Page, pdfjs } from 'react-pdf'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
-import { getNoteBySlug, getNotes } from '../lib/api'
+import { getNoteBySlug, getNotes, incrementDownload } from '../lib/api'
 import { useAsync } from '../hooks/useAsync'
 import { useContainerWidth } from '../hooks/useContainerWidth'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { GlassCard, ClayCard } from '../components/ui/Card'
 import { Tag } from '../components/ui/Tag'
+import { ShareButton } from '../components/ShareButton'
 import { Loading, ErrorState } from '../components/ui/StateViews'
 
 // Vite-compatible worker setup for pdf.js (react-pdf's underlying PDF engine).
@@ -39,18 +40,28 @@ export default function NoteDetail() {
   const [pageNumber, setPageNumber] = useState(1)
   const [pdfError, setPdfError] = useState(false)
   const [zoom, setZoom] = useState(1)
+  const [downloadCount, setDownloadCount] = useState<number | null>(null)
 
   if (loading) return <Loading label="Loading note…" />
   if (error) return <ErrorState message={error} onRetry={refetch} />
   if (!note) return null
 
   const relatedNotes = (related ?? []).filter((n) => n.slug !== note.slug).slice(0, 3)
+  const displayedDownloads = downloadCount ?? note.downloadCount
+
+  function handleDownloadClick() {
+    setDownloadCount((c) => (c ?? note!.downloadCount) + 1)
+    incrementDownload(note!.slug).catch(() => undefined) // fire-and-forget; UI already updated
+  }
 
   return (
     <div className="flex flex-col gap-6">
-      <Link to="/notes" className="w-fit text-sm text-muted hover:text-text">
-        ← Back to Notes
-      </Link>
+      <div className="flex items-center justify-between">
+        <Link to="/notes" className="w-fit text-sm text-muted hover:text-text">
+          ← Back to Notes
+        </Link>
+        <ShareButton />
+      </div>
 
       <div className="flex flex-col gap-3">
         <Tag variant="notes">{note.subject}</Tag>
@@ -69,13 +80,19 @@ export default function NoteDetail() {
         </div>
       </div>
 
-      <a
-        href={note.fileUrl}
-        download
-        className="clay-btn w-fit rounded-full px-5 py-2.5 text-sm font-medium text-text"
-      >
-        ⭳ Download {note.fileType.toUpperCase()}
-      </a>
+      <div className="flex flex-wrap items-center gap-3">
+        <a
+          href={note.fileUrl}
+          download
+          onClick={handleDownloadClick}
+          className="clay-btn w-fit rounded-full px-5 py-2.5 text-sm font-medium text-text"
+        >
+          ⭳ Download {note.fileType.toUpperCase()}
+        </a>
+        <span className="text-xs text-muted">
+          {displayedDownloads} download{displayedDownloads === 1 ? '' : 's'}
+        </span>
+      </div>
 
       {note.fileType === 'pdf' && !pdfError && (
         <ClayCard className="flex flex-col items-center gap-4 px-4 py-6">

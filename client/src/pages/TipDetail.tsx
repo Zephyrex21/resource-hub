@@ -8,6 +8,7 @@ import { usePageTitle } from '../hooks/usePageTitle'
 import { GlassCard } from '../components/ui/Card'
 import { Tag } from '../components/ui/Tag'
 import { CodeBlock } from '../components/CodeBlock'
+import { ShareButton } from '../components/ShareButton'
 import { Loading, ErrorState } from '../components/ui/StateViews'
 
 export default function TipDetail() {
@@ -21,9 +22,12 @@ export default function TipDetail() {
 
   return (
     <div className="flex flex-col gap-6">
-      <Link to="/tips" className="w-fit text-sm text-muted hover:text-text">
-        ← Back to Tips
-      </Link>
+      <div className="flex items-center justify-between">
+        <Link to="/tips" className="w-fit text-sm text-muted hover:text-text">
+          ← Back to Tips
+        </Link>
+        <ShareButton />
+      </div>
 
       <div className="flex flex-col gap-3">
         <Tag variant="tips">{tip.category}</Tag>

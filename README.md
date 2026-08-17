@@ -2,6 +2,16 @@
 
 ## Recent updates (post-Phase 5)
 
+- **New features, not just polish:**
+  - **About page** (`/about`) — was in the original blueprint's route list but never actually
+    got built. Real bio, tech stack, and a "how it's put together" section.
+  - **Global error boundary** — an unexpected render error now shows a "Something went
+    wrong, reload" screen instead of a blank white page.
+  - **Working download tracking** — the `downloadCount` field has existed on the Note schema
+    since Phase 1 but nothing ever incremented it. `POST /api/v1/notes/:slug/download` now
+    does, and the count shows next to the download button (optimistic UI — updates instantly,
+    syncs with the server in the background).
+  - **Share button** — copies the current page URL, on both Note and Tip detail pages.
 - **Finishing-touch polish:**
   - Real favicon (matches the hero illustration's three-node motif) + Open Graph/Twitter
     meta tags, so link previews actually look intentional when shared

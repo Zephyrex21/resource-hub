@@ -115,6 +115,8 @@ export const getProjectBySlug = (slug: string) => request<Project>(`/projects/${
 
 export const search = (q: string) => request<SearchResults>(`/search${buildQuery({ q })}`)
 export const getStats = () => request<Stats>('/stats')
+export const incrementDownload = (slug: string) =>
+  request<{ downloadCount: number }>(`/notes/${slug}/download`, { method: 'POST' })
 
 // --- Auth ---
 export const login = (email: string, password: string) =>

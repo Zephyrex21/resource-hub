@@ -7,6 +7,7 @@ import Home from './pages/Home'
 import NotesHub from './pages/NotesHub'
 import TipsHub from './pages/TipsHub'
 import ProjectsGrid from './pages/ProjectsGrid'
+import About from './pages/About'
 import NotFound from './pages/NotFound'
 
 // Code-split heavier, less-visited routes out of the main bundle:
@@ -41,6 +42,7 @@ export default function App() {
           }
         />
         <Route path="/projects" element={<ProjectsGrid />} />
+        <Route path="/about" element={<About />} />
         <Route
           path="/admin/login"
           element={
