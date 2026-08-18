@@ -9,6 +9,7 @@ import { GlassCard } from '../components/ui/Card'
 import { Tag } from '../components/ui/Tag'
 import { CodeBlock } from '../components/CodeBlock'
 import { ShareButton } from '../components/ShareButton'
+import { FilePreview } from '../components/FilePreview'
 import { Loading, ErrorState } from '../components/ui/StateViews'
 
 export default function TipDetail() {
@@ -58,13 +59,16 @@ export default function TipDetail() {
       )}
 
       {tip.fileUrl && (
-        <a
-          href={tip.fileUrl}
-          download
-          className="clay-btn w-fit rounded-full px-5 py-2.5 text-sm font-medium text-text"
-        >
-          ⭳ Download PDF
-        </a>
+        <>
+          <a
+            href={tip.fileUrl}
+            download
+            className="clay-btn w-fit rounded-full px-5 py-2.5 text-sm font-medium text-text"
+          >
+            ⭳ Download {tip.fileUrl.split('?')[0].split('.').pop()?.toUpperCase() ?? 'file'}
+          </a>
+          <FilePreview fileUrl={tip.fileUrl} />
+        </>
       )}
     </div>
   )

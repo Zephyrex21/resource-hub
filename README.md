@@ -2,6 +2,21 @@
 
 ## Recent updates (post-Phase 5)
 
+- **Unified file preview, and a real bug fix:**
+  - Extracted the PDF viewer into a shared `<FilePreview>` component and **added .docx preview**
+    (via `docx-preview`, rendered fully client-side — no server round-trip) for both Notes
+    and Tips. Previously only PDFs previewed; DOCX just showed a download link.
+  - **Tips now preview their attached files too** — previously a Tip with a `fileUrl` only
+    ever showed a bare download button, even for PDFs.
+  - **Fixed a real blank-preview bug:** `<Page>` (react-pdf) does its own async canvas render
+    *after* the document's page count is already known, so there was a visible gap where the
+    page navigation showed ("Page 1 of 20") but the canvas hadn't painted yet — a blank white
+    box. Added a `loading` state directly on `<Page>` to close that gap.
+  - File type is now detected from the URL extension rather than trusting the stored
+    `fileType` field, so preview stays correct even if that field and the actual file
+    ever mismatch.
+  - `docx-preview` is dynamically imported only when an actual `.docx` is being viewed —
+    doesn't add weight to PDF views (which, right now, is 100% of your real content).
 - **New features, not just polish:**
   - **About page** (`/about`) — was in the original blueprint's route list but never actually
     got built. Real bio, tech stack, and a "how it's put together" section.
