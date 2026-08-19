@@ -12,9 +12,7 @@ export default function ProjectsGrid() {
   usePageTitle('Projects')
   const { data: projects, loading, error, refetch } = useAsync(() => getProjects(), [])
 
-  const sorted = projects
-    ? [...projects].sort((a, b) => Number(b.featured) - Number(a.featured))
-    : null
+  const sorted = projects ? [...projects].sort((a, b) => a.order - b.order) : null
 
   return (
     <div className="flex flex-col gap-6">

@@ -2,6 +2,27 @@
 
 ## Recent updates (post-Phase 5)
 
+- **Real Projects from GitHub, with explicit priority ordering:**
+  - Replaced the seed script's Projects with 6 verified repos from
+    github.com/Zephyrex21 — Vision Interpretability Studio and Urban Heat
+    Mitigation first (the AI/ML-heaviest work), then AllowOrigin, then the
+    utility/educational projects.
+  - Added a real `order` field to the Project schema (lower = shown first) —
+    `featured` alone couldn't express an exact ranking. Editable per-project
+    in the admin panel now too.
+  - **Note:** GitHub blocks automated scraping of the full repositories tab,
+    so only repos already known or linked from your pinned/README section
+    could be verified. If you have other repos (e.g. a RAG assistant or
+    data-analyst project) you want included, just add them via `/admin` —
+    `order: 0` puts something at the very top instantly.
+- **`npm run seed` no longer touches Notes or Tips** — it used to wipe *all*
+  notes/tips and reinsert 4 sample notes + 2 sample tips every time it ran,
+  which would have deleted your real imported content on a re-seed. It now
+  only manages Projects.
+- **New: `npm run clean-samples`** — removes exactly the old placeholder
+  sample notes/tips (by their known slugs) from a database that already has
+  them from an earlier seed run, without touching anything you've added
+  yourself. Safe to run more than once.
 - **Unified file preview, and a real bug fix:**
   - Extracted the PDF viewer into a shared `<FilePreview>` component and **added .docx preview**
     (via `docx-preview`, rendered fully client-side — no server round-trip) for both Notes
@@ -406,6 +427,18 @@ This repo already includes 5 real notes in `server/import/files/` + a filled-in
 `manifest.json` — Docker fundamentals, LLM engineering/inference, LLM security issues,
 a RAG vs CAG vs MAG comparison, and a full React beginner-to-advanced set. Run the two
 commands above and they'll appear on `/notes` for real, PDF viewer and all.
+
+## Applying this update to your live site
+
+Two commands to run from `server/` (against your real, deployed database —
+same `.env` you're already using):
+
+```bash
+npm run clean-samples   # removes the old sample notes/tips, leaves your real content alone
+npm run seed             # refreshes Projects with your real GitHub repos
+```
+
+Then redeploy the client as usual (`git push` — Vercel picks it up automatically).
 
 ## Troubleshooting
 

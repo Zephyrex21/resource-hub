@@ -13,6 +13,9 @@ const projectSchema = new mongoose.Schema(
     coverImageUrl: { type: String, default: '' },
     status: { type: String, enum: PROJECT_STATUSES, default: 'active' },
     featured: { type: Boolean, default: false },
+    // Lower = shown first. Explicit rather than inferring priority from
+    // featured/createdAt, which can't reliably express "this exact order."
+    order: { type: Number, default: 0 },
   },
   { timestamps: true },
 )

@@ -45,6 +45,7 @@ export interface Project {
   coverImageUrl: string
   status: 'active' | 'completed' | 'archived'
   featured: boolean
+  order: number
   createdAt: string
   updatedAt: string
 }

@@ -1,126 +1,23 @@
-// Seeds the database with real starter content so the API and (later) the UI
-// have something genuine to render instead of "Lorem ipsum" placeholders.
+// Seeds the database with real Projects data from your GitHub.
 //
-// Notes/Tips still point at placeholder fileUrls — swap those for real
-// Supabase Storage / Cloudinary links once file upload is wired up (Phase 3).
-// Project URLs are best-effort based on known repo naming — double-check
-// each githubUrl/liveUrl against your actual GitHub before deploying.
+// Deliberately does NOT touch Notes or Tips — those are now live content
+// (managed via the admin panel and `npm run import-notes`), and a
+// deleteMany+insertMany cycle here would wipe real uploaded notes every
+// time this script runs. Projects are safe to fully reseed since they're
+// meant to mirror your GitHub portfolio as a whole, not accumulate
+// independently.
+//
+// Re-run any time your GitHub projects change: `npm run seed`.
 
 import 'dotenv/config'
 import mongoose from 'mongoose'
 import { connectDB } from './config/db.js'
-import Note from './models/Note.js'
-import Tip from './models/Tip.js'
 import Project from './models/Project.js'
 
-const notes = [
-  {
-    title: 'DBMS Fundamentals — Normalization & ER Modeling',
-    slug: 'dbms-fundamentals-normalization-er-modeling',
-    subject: 'DBMS',
-    tags: ['dbms', 'normalization', 'sql'],
-    description:
-      'Core relational database concepts: ER diagrams, normal forms (1NF–BCNF), and keys — condensed for quick revision.',
-    // Local test file (served by the client's Vite dev server at :5173) so the
-    // in-browser PDF viewer is actually testable end-to-end in Phase 2.
-    // Swap for a real Supabase Storage / Cloudinary URL once uploads exist (Phase 3).
-    fileUrl: 'http://localhost:5173/sample-note.pdf',
-    fileType: 'pdf',
-    difficulty: 'beginner',
-  },
-  {
-    title: 'Operating Systems — Process Scheduling & Deadlocks',
-    slug: 'os-process-scheduling-deadlocks',
-    subject: 'OS',
-    tags: ['os', 'scheduling', 'deadlock'],
-    description:
-      "Scheduling algorithms (FCFS, SJF, Round Robin), deadlock conditions, and a Banker's Algorithm walkthrough.",
-    fileUrl: 'https://example.com/notes/os-scheduling.pdf',
-    fileType: 'pdf',
-    difficulty: 'intermediate',
-  },
-  {
-    title: 'LLMs & RAG — How Retrieval-Augmented Generation Works',
-    slug: 'llms-rag-how-it-works',
-    subject: 'LLMs',
-    tags: ['llm', 'rag', 'embeddings', 'vector-db'],
-    description:
-      'Chunking, embeddings, vector search, and the retrieval-then-generate pipeline — plus common failure modes.',
-    fileUrl: 'https://example.com/notes/rag-explained.pdf',
-    fileType: 'pdf',
-    difficulty: 'intermediate',
-  },
-  {
-    title: 'DSA — Trees, Graphs & Traversals Cheat Sheet',
-    slug: 'dsa-trees-graphs-traversals',
-    subject: 'DSA',
-    tags: ['dsa', 'trees', 'graphs'],
-    description: 'BFS/DFS, tree traversals, and when to reach for each — with complexity notes.',
-    fileUrl: 'https://example.com/notes/dsa-trees-graphs.pdf',
-    fileType: 'pdf',
-    difficulty: 'beginner',
-  },
-]
-
-const tips = [
-  {
-    title: 'Install & Configure Docker on Ubuntu',
-    slug: 'install-configure-docker-ubuntu',
-    category: 'Docker',
-    tags: ['docker', 'linux', 'setup'],
-    summary:
-      'A clean install of Docker Engine on Ubuntu, plus the post-install steps people usually forget.',
-    contentMarkdown: `## Install Docker Engine
-
-\`\`\`bash
-curl -fsSL https://get.docker.com | sh
-\`\`\`
-
-## Run Docker without sudo
-
-\`\`\`bash
-sudo usermod -aG docker $USER
-newgrp docker
-\`\`\`
-
-## Enable Docker on boot
-
-\`\`\`bash
-sudo systemctl enable docker
-\`\`\`
-
-## Verify it worked
-
-\`\`\`bash
-docker run hello-world
-\`\`\`
-`,
-  },
-  {
-    title: 'Fix "Permission Denied" on Git Push over SSH',
-    slug: 'fix-git-push-ssh-permission-denied',
-    category: 'Git',
-    tags: ['git', 'ssh'],
-    summary: "The usual cause is a missing or unloaded SSH key — here's the full checklist.",
-    contentMarkdown: `## Checklist
-
-1. Confirm a key exists:
-   \`\`\`bash
-   ls -al ~/.ssh
-   \`\`\`
-2. Add it to the SSH agent:
-   \`\`\`bash
-   ssh-add ~/.ssh/id_ed25519
-   \`\`\`
-3. Test the connection:
-   \`\`\`bash
-   ssh -T git@github.com
-   \`\`\`
-4. Make sure the public key is added under GitHub → Settings → SSH and GPG keys.
-`,
-  },
-]
-
+// Verified against github.com/Zephyrex21 — 6 repos confirmed directly
+// (GitHub's repositories tab blocks automated access, so this isn't
+// necessarily your full list). Ordered highest-priority first; edit the
+// `order` field (or use the admin panel) to rearrange later.
 const projects = [
   {
     title: 'Vision Interpretability Studio',
@@ -132,6 +29,19 @@ const projects = [
     liveUrl: 'https://vision-interpretability-studio.vercel.app',
     status: 'active',
     featured: true,
+    order: 1,
+  },
+  {
+    title: 'Urban Heat Mitigation',
+    slug: 'urban-heat-mitigation',
+    description:
+      'Optimizing urban heat mitigation and cooling strategies via AI/ML — XGBoost + SHAP for prediction and explainability, Deck.gl + MapLibre for spatial visualization across 13 Indian cities.',
+    techStack: ['Python', 'FastAPI', 'XGBoost', 'SHAP', 'GeoPandas', 'React', 'Deck.gl', 'MapLibre'],
+    githubUrl: 'https://github.com/Zephyrex21/urban-heat-mitigation',
+    liveUrl: null,
+    status: 'completed',
+    featured: true,
+    order: 2,
   },
   {
     title: 'AllowOrigin',
@@ -143,49 +53,42 @@ const projects = [
     liveUrl: 'https://alloworigin.dev',
     status: 'completed',
     featured: true,
-  },
-  {
-    title: 'Automata Visualizer',
-    slug: 'automata-visualizer',
-    description:
-      'An interactive visualizer for Theory of Automata concepts — DFA/NFA construction and step-by-step simulation.',
-    techStack: ['JavaScript', 'HTML5', 'CSS3'],
-    githubUrl: 'https://github.com/Zephyrex21/Automata-Visualizer',
-    liveUrl: null,
-    status: 'completed',
-    featured: false,
-  },
-  {
-    title: 'Red-Black Tree Visualizer',
-    slug: 'red-black-tree-visualizer',
-    description:
-      'An animated Red-Black Tree visualizer showing rotations and recoloring step by step as nodes are inserted or deleted.',
-    techStack: ['JavaScript', 'HTML5', 'CSS3'],
-    githubUrl: 'https://github.com/Zephyrex21/RBT_Visualizer',
-    liveUrl: null,
-    status: 'completed',
-    featured: false,
-  },
-  {
-    title: 'Urban Heat MVP',
-    slug: 'urban-heat-mvp',
-    description:
-      'AI-powered urban heat island analysis across 13 Indian cities — XGBoost + SHAP on the backend, Deck.gl + MapLibre for spatial visualization.',
-    techStack: ['FastAPI', 'XGBoost', 'SHAP', 'GeoPandas', 'React', 'Deck.gl', 'MapLibre'],
-    githubUrl: 'https://github.com/Zephyrex21/urban-heat-mitigation',
-    liveUrl: null,
-    status: 'completed',
-    featured: false,
+    order: 3,
   },
   {
     title: 'Cryptex — File Sharing',
     slug: 'cryptex-file-sharing',
-    description: 'A MERN-stack encrypted file sharing app using Supabase Storage for uploads.',
+    description: 'A secure, token-based file sharing platform built with the MERN stack and Supabase Storage.',
     techStack: ['React', 'Node.js', 'Express', 'MongoDB', 'Supabase Storage'],
     githubUrl: 'https://github.com/Zephyrex21/Cryptex_File_Sharing',
     liveUrl: null,
     status: 'completed',
     featured: false,
+    order: 4,
+  },
+  {
+    title: 'Automata Visualizer',
+    slug: 'automata-visualizer',
+    description:
+      'A web-based Automata Lab for visualizing and simulating NFA, DFA, and model conversions — making TAFL concepts interactive and intuitive.',
+    techStack: ['JavaScript', 'HTML5', 'CSS3'],
+    githubUrl: 'https://github.com/Zephyrex21/Automata-Visualizer',
+    liveUrl: 'https://automata-lab.netlify.app',
+    status: 'completed',
+    featured: false,
+    order: 5,
+  },
+  {
+    title: 'Red-Blackify — Red-Black Tree Visualizer',
+    slug: 'red-black-tree-visualizer',
+    description:
+      'An interactive tool for demystifying Red-Black Trees — see how insertions trigger automatic rebalancing through color changes and rotations.',
+    techStack: ['JavaScript', 'HTML5', 'CSS3'],
+    githubUrl: 'https://github.com/Zephyrex21/RBT_Visualizer',
+    liveUrl: 'https://rbt-visualizer.netlify.app',
+    status: 'completed',
+    featured: false,
+    order: 6,
   },
 ]
 
@@ -197,15 +100,10 @@ async function seed() {
     process.exit(1)
   }
 
-  await Promise.all([Note.deleteMany({}), Tip.deleteMany({}), Project.deleteMany({})])
-
-  await Note.insertMany(notes)
-  await Tip.insertMany(tips)
+  await Project.deleteMany({})
   await Project.insertMany(projects)
 
-  console.log(
-    `[seed] Inserted ${notes.length} notes, ${tips.length} tips, ${projects.length} projects`,
-  )
+  console.log(`[seed] Inserted ${projects.length} projects. Notes and Tips were not touched.`)
 
   await mongoose.disconnect()
   process.exit(0)

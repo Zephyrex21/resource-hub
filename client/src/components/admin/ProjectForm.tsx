@@ -19,6 +19,7 @@ export function ProjectForm({ meta, editing, onSaved, onCancelEdit }: Props) {
   const [liveUrl, setLiveUrl] = useState('')
   const [status, setStatus] = useState<Project['status']>('active')
   const [featured, setFeatured] = useState(false)
+  const [order, setOrder] = useState(0)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -31,6 +32,7 @@ export function ProjectForm({ meta, editing, onSaved, onCancelEdit }: Props) {
       setLiveUrl(editing.liveUrl ?? '')
       setStatus(editing.status)
       setFeatured(editing.featured)
+      setOrder(editing.order)
     } else {
       setTitle('')
       setDescription('')
@@ -39,6 +41,7 @@ export function ProjectForm({ meta, editing, onSaved, onCancelEdit }: Props) {
       setLiveUrl('')
       setStatus('active')
       setFeatured(false)
+      setOrder(0)
     }
   }, [editing])
 
@@ -55,6 +58,7 @@ export function ProjectForm({ meta, editing, onSaved, onCancelEdit }: Props) {
       liveUrl: liveUrl.trim() || null,
       status,
       featured,
+      order,
     }
 
     try {
@@ -114,6 +118,16 @@ export function ProjectForm({ meta, editing, onSaved, onCancelEdit }: Props) {
       <label className="flex items-center gap-2 text-sm text-muted">
         <input type="checkbox" checked={featured} onChange={(e) => setFeatured(e.target.checked)} />
         Featured
+      </label>
+
+      <label className="flex flex-col gap-1 text-sm text-muted">
+        Priority order (lower shows first)
+        <input
+          type="number"
+          value={order}
+          onChange={(e) => setOrder(Number(e.target.value))}
+          className={inputClass}
+        />
       </label>
 
       {error && <p className="text-sm text-red-500">{error}</p>}
