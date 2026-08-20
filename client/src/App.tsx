@@ -8,6 +8,8 @@ import NotesHub from './pages/NotesHub'
 import TipsHub from './pages/TipsHub'
 import ProjectsGrid from './pages/ProjectsGrid'
 import About from './pages/About'
+import WhatsNew from './pages/WhatsNew'
+import Bookmarks from './pages/Bookmarks'
 import NotFound from './pages/NotFound'
 
 // Code-split heavier, less-visited routes out of the main bundle:
@@ -15,6 +17,7 @@ import NotFound from './pages/NotFound'
 // needed on most visits.
 const NoteDetail = lazy(() => import('./pages/NoteDetail'))
 const TipDetail = lazy(() => import('./pages/TipDetail'))
+const ProjectDetail = lazy(() => import('./pages/ProjectDetail'))
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'))
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
 
@@ -42,7 +45,17 @@ export default function App() {
           }
         />
         <Route path="/projects" element={<ProjectsGrid />} />
+        <Route
+          path="/projects/:slug"
+          element={
+            <Suspense fallback={<Loading label="Loading project…" />}>
+              <ProjectDetail />
+            </Suspense>
+          }
+        />
         <Route path="/about" element={<About />} />
+        <Route path="/whats-new" element={<WhatsNew />} />
+        <Route path="/bookmarks" element={<Bookmarks />} />
         <Route
           path="/admin/login"
           element={

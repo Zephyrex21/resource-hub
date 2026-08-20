@@ -2,6 +2,26 @@
 
 ## Recent updates (post-Phase 5)
 
+- **Six new features (content/discovery + bigger-picture, not UI polish):**
+  - **Project detail pages** (`/projects/:slug`) — cards now link to a full page with view count,
+    tech stack, GitHub/Live buttons, and a cover image slot if you add one via the admin panel.
+  - **Bookmarks/Saved** (`/bookmarks`) — a Save button on every Note/Tip/Project detail page,
+    stored in `localStorage` (no login required). Grouped by type on the Saved page.
+  - **Reading progress + table of contents** — Tip pages with `##`/`###` headings now get an
+    auto-generated "On this page" jump-list, plus a thin progress bar pinned to the top of the
+    viewport that fills as you scroll.
+  - **"What's New"** (`/whats-new`) — a unified, chronological feed merging the latest Notes,
+    Tips, and Projects in one place.
+  - **PWA support** — the site is now installable (desktop and mobile) via `vite-plugin-pwa`,
+    with a real manifest + icons and offline caching: API responses cache network-first (so
+    lists/details still show something offline after a first visit), and Supabase-hosted
+    files cache stale-while-revalidate (so a previously-opened PDF/DOCX stays viewable
+    offline, not just its metadata).
+  - **Real view-count analytics** — every Note/Tip/Project now tracks `viewCount` (separate
+    from Notes' existing `downloadCount`), with a new **Analytics** tab in the admin panel
+    showing top-viewed content per type.
+  - All three content types got a shared `order`-aware sort where relevant (Projects), and a
+    reusable `useViewTracking` hook so the view-increment logic isn't duplicated three times.
 - **Real Projects from GitHub, with explicit priority ordering:**
   - Replaced the seed script's Projects with 6 verified repos from
     github.com/Zephyrex21 — Vision Interpretability Studio and Urban Heat
@@ -439,6 +459,40 @@ npm run seed             # refreshes Projects with your real GitHub repos
 ```
 
 Then redeploy the client as usual (`git push` — Vercel picks it up automatically).
+
+## Applying this update to your live site
+
+Same as before — Projects changed, so:
+
+```bash
+npm run clean-samples   # if you haven't already run this
+npm run seed             # refreshes Projects with the real GitHub data / new `order` field
+```
+
+No new env vars needed for any of the six new features — bookmarks are pure localStorage,
+and the PWA/view-tracking/analytics pieces all use your existing MongoDB connection.
+
+## Testing the six new features
+
+1. **Project detail pages:** go to `/projects`, click any card (not the GitHub/Live buttons
+   specifically — the whole card is clickable) — should land on `/projects/<slug>` with a
+   view count, full tech stack, and working buttons.
+2. **Bookmarks:** click **Save** on a Note, Tip, or Project detail page, then visit
+   `/bookmarks` (linked from the footer) — it should be there, grouped by type. Refresh the
+   page — it should persist (localStorage). Click **Remove** to confirm removal works both
+   from the Saved page and by toggling Save again on the original page.
+3. **Reading progress + TOC:** open a Tip with multiple `##`/`###` headings in its Markdown
+   (the Docker one from your seed data works) — you should see an "On this page" jump-list
+   above the content, and a thin colored line at the very top of the viewport that fills in
+   as you scroll.
+4. **What's New:** visit `/whats-new` — should show your real notes, tips, and projects
+   mixed together, most recent first, each tagged with its type.
+5. **PWA:** in Chrome/Edge, look for an install icon in the address bar (or Menu → Install
+   Resource Hub). After installing, open it — it should run in its own window without browser
+   chrome. To test offline caching: visit a few pages while online, then go offline (DevTools
+   → Network → Offline) and reload — previously-visited pages should still load from cache.
+6. **View analytics:** visit a few Note/Tip/Project pages to generate views, then check
+   `/admin` → **Analytics** tab — should show them ranked by view count.
 
 ## Troubleshooting
 

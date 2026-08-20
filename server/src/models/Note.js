@@ -14,6 +14,7 @@ const noteSchema = new mongoose.Schema(
     coverImageUrl: { type: String, default: '' },
     difficulty: { type: String, enum: DIFFICULTIES, default: 'beginner' },
     downloadCount: { type: Number, default: 0 },
+    viewCount: { type: Number, default: 0 },
   },
   { timestamps: true },
 )

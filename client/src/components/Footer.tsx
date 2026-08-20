@@ -4,6 +4,8 @@ const quickLinks = [
   { to: '/notes', label: 'Notes' },
   { to: '/tips', label: 'Tips & Tricks' },
   { to: '/projects', label: 'Projects' },
+  { to: '/whats-new', label: "What's New" },
+  { to: '/bookmarks', label: 'Saved' },
   { to: '/about', label: 'About' },
 ]
 

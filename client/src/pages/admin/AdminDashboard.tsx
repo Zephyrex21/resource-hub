@@ -6,9 +6,10 @@ import { getMeta } from '../../lib/api'
 import { NotesPanel } from './NotesPanel'
 import { TipsPanel } from './TipsPanel'
 import { ProjectsPanel } from './ProjectsPanel'
+import { AnalyticsPanel } from './AnalyticsPanel'
 import { Loading, ErrorState } from '../../components/ui/StateViews'
 
-const tabs = ['notes', 'tips', 'projects'] as const
+const tabs = ['notes', 'tips', 'projects', 'analytics'] as const
 type Tab = (typeof tabs)[number]
 
 export default function AdminDashboard() {
@@ -32,7 +33,7 @@ export default function AdminDashboard() {
         </button>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         {tabs.map((t) => (
           <button
             key={t}
@@ -49,6 +50,7 @@ export default function AdminDashboard() {
       {tab === 'notes' && <NotesPanel meta={meta} />}
       {tab === 'tips' && <TipsPanel meta={meta} />}
       {tab === 'projects' && <ProjectsPanel meta={meta} />}
+      {tab === 'analytics' && <AnalyticsPanel />}
     </div>
   )
 }

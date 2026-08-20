@@ -1,9 +1,23 @@
-import type { ReactNode } from 'react'
+import type { MouseEventHandler, ReactNode } from 'react'
 
-export function GlassCard({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <div className={`glass-card rounded-2xl ${className}`}>{children}</div>
+interface CardProps {
+  children: ReactNode
+  className?: string
+  onClick?: MouseEventHandler<HTMLDivElement>
 }
 
-export function ClayCard({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <div className={`clay-card rounded-2xl ${className}`}>{children}</div>
+export function GlassCard({ children, className = '', onClick }: CardProps) {
+  return (
+    <div className={`glass-card rounded-2xl ${className}`} onClick={onClick}>
+      {children}
+    </div>
+  )
+}
+
+export function ClayCard({ children, className = '', onClick }: CardProps) {
+  return (
+    <div className={`clay-card rounded-2xl ${className}`} onClick={onClick}>
+      {children}
+    </div>
+  )
 }

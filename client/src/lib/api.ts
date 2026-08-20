@@ -16,6 +16,7 @@ export interface Note {
   coverImageUrl: string
   difficulty: 'beginner' | 'intermediate' | 'advanced'
   downloadCount: number
+  viewCount: number
   createdAt: string
   updatedAt: string
 }
@@ -30,6 +31,7 @@ export interface Tip {
   contentMarkdown: string
   fileUrl: string
   coverImageUrl: string
+  viewCount: number
   createdAt: string
   updatedAt: string
 }
@@ -46,6 +48,7 @@ export interface Project {
   status: 'active' | 'completed' | 'archived'
   featured: boolean
   order: number
+  viewCount: number
   createdAt: string
   updatedAt: string
 }
@@ -71,6 +74,12 @@ export interface Stats {
   notes: number
   tips: number
   projects: number
+}
+
+export interface TopContent {
+  notes: Pick<Note, '_id' | 'title' | 'slug' | 'subject' | 'viewCount'>[]
+  tips: Pick<Tip, '_id' | 'title' | 'slug' | 'category' | 'viewCount'>[]
+  projects: Pick<Project, '_id' | 'title' | 'slug' | 'status' | 'viewCount'>[]
 }
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api/v1'
@@ -116,8 +125,12 @@ export const getProjectBySlug = (slug: string) => request<Project>(`/projects/${
 
 export const search = (q: string) => request<SearchResults>(`/search${buildQuery({ q })}`)
 export const getStats = () => request<Stats>('/stats')
+export const getTopContent = () => request<TopContent>('/stats/top')
 export const incrementDownload = (slug: string) =>
   request<{ downloadCount: number }>(`/notes/${slug}/download`, { method: 'POST' })
+
+export const incrementView = (resource: 'notes' | 'tips' | 'projects', slug: string) =>
+  request<{ viewCount: number }>(`/${resource}/${slug}/view`, { method: 'POST' })
 
 // --- Auth ---
 export const login = (email: string, password: string) =>

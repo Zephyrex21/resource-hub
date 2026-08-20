@@ -3,9 +3,11 @@ import { useParams, Link } from 'react-router-dom'
 import { getNoteBySlug, getNotes, incrementDownload } from '../lib/api'
 import { useAsync } from '../hooks/useAsync'
 import { usePageTitle } from '../hooks/usePageTitle'
+import { useViewTracking } from '../hooks/useViewTracking'
 import { GlassCard } from '../components/ui/Card'
 import { Tag } from '../components/ui/Tag'
 import { ShareButton } from '../components/ShareButton'
+import { BookmarkButton } from '../components/BookmarkButton'
 import { FilePreview } from '../components/FilePreview'
 import { Loading, ErrorState } from '../components/ui/StateViews'
 
@@ -13,6 +15,7 @@ export default function NoteDetail() {
   const { slug } = useParams<{ slug: string }>()
   const { data: note, loading, error, refetch } = useAsync(() => getNoteBySlug(slug!), [slug])
   usePageTitle(note?.title ?? 'Notes')
+  useViewTracking('notes', slug)
 
   // Same-subject notes, fetched as soon as the subject is known. Safe to
   // call unconditionally (before the loading/error returns below) since
@@ -42,7 +45,10 @@ export default function NoteDetail() {
         <Link to="/notes" className="w-fit text-sm text-muted hover:text-text">
           ← Back to Notes
         </Link>
-        <ShareButton />
+        <div className="flex gap-2">
+          <BookmarkButton type="note" slug={note.slug} title={note.title} subtitle={note.subject} />
+          <ShareButton />
+        </div>
       </div>
 
       <div className="flex flex-col gap-3">

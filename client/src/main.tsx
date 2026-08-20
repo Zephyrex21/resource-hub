@@ -6,6 +6,7 @@ import App from './App'
 import { ThemeProvider } from './context/ThemeContext'
 import { AuthProvider } from './context/AuthContext'
 import { ToastProvider } from './context/ToastContext'
+import { BookmarksProvider } from './context/BookmarksContext'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import './index.css'
 
@@ -17,7 +18,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <ThemeProvider>
             <AuthProvider>
               <ToastProvider>
-                <App />
+                <BookmarksProvider>
+                  <App />
+                </BookmarksProvider>
               </ToastProvider>
             </AuthProvider>
           </ThemeProvider>

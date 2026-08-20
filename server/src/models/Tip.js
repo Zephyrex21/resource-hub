@@ -14,6 +14,7 @@ const tipSchema = new mongoose.Schema(
     // Fallback: a PDF/DOC, same as Notes, for tips you haven't converted yet.
     fileUrl: { type: String, default: '' },
     coverImageUrl: { type: String, default: '' },
+    viewCount: { type: Number, default: 0 },
   },
   { timestamps: true },
 )

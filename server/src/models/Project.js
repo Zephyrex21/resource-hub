@@ -16,6 +16,7 @@ const projectSchema = new mongoose.Schema(
     // Lower = shown first. Explicit rather than inferring priority from
     // featured/createdAt, which can't reliably express "this exact order."
     order: { type: Number, default: 0 },
+    viewCount: { type: Number, default: 0 },
   },
   { timestamps: true },
 )

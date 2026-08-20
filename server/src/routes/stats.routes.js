@@ -20,4 +20,19 @@ router.get('/', async (req, res, next) => {
   }
 })
 
+// Powers a small "top content" view in the admin panel.
+router.get('/top', async (req, res, next) => {
+  try {
+    const limit = 5
+    const [notes, tips, projects] = await Promise.all([
+      Note.find().sort({ viewCount: -1 }).limit(limit).select('title slug subject viewCount'),
+      Tip.find().sort({ viewCount: -1 }).limit(limit).select('title slug category viewCount'),
+      Project.find().sort({ viewCount: -1 }).limit(limit).select('title slug status viewCount'),
+    ])
+    res.json({ notes, tips, projects })
+  } catch (err) {
+    next(err)
+  }
+})
+
 export default router

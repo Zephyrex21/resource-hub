@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { getProjects } from '../lib/api'
 import { useAsync } from '../hooks/useAsync'
@@ -10,6 +11,7 @@ import { usePageTitle } from '../hooks/usePageTitle'
 
 export default function ProjectsGrid() {
   usePageTitle('Projects')
+  const navigate = useNavigate()
   const { data: projects, loading, error, refetch } = useAsync(() => getProjects(), [])
 
   const sorted = projects ? [...projects].sort((a, b) => a.order - b.order) : null
@@ -36,7 +38,10 @@ export default function ProjectsGrid() {
         >
           {sorted.map((project) => (
             <motion.div key={project._id} variants={itemVariants}>
-              <GlassCard className="flex h-full flex-col gap-3 px-5 py-6">
+              <GlassCard
+                onClick={() => navigate(`/projects/${project.slug}`)}
+                className="flex h-full cursor-pointer flex-col gap-3 px-5 py-6 transition-transform hover:-translate-y-1"
+              >
                 <div className="flex items-center justify-between">
                   <Tag variant="projects">{project.status}</Tag>
                   {project.featured && <Tag variant="neutral">Featured</Tag>}
@@ -53,7 +58,8 @@ export default function ProjectsGrid() {
                   ))}
                 </div>
 
-                <div className="mt-auto flex gap-3 pt-2">
+                {/* stopPropagation so these external links don't also trigger the card's own navigate() */}
+                <div className="mt-auto flex gap-3 pt-2" onClick={(e) => e.stopPropagation()}>
                   <a
                     href={project.githubUrl}
                     target="_blank"
