@@ -1,14 +1,14 @@
 import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { getNoteBySlug, getNotes, incrementDownload } from '../lib/api'
+import { getNoteBySlug, incrementDownload } from '../lib/api'
 import { useAsync } from '../hooks/useAsync'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { useViewTracking } from '../hooks/useViewTracking'
-import { GlassCard } from '../components/ui/Card'
 import { Tag } from '../components/ui/Tag'
 import { ShareButton } from '../components/ShareButton'
 import { BookmarkButton } from '../components/BookmarkButton'
 import { FilePreview } from '../components/FilePreview'
+import { RelatedContent } from '../components/RelatedContent'
 import { Loading, ErrorState } from '../components/ui/StateViews'
 
 export default function NoteDetail() {
@@ -17,21 +17,12 @@ export default function NoteDetail() {
   usePageTitle(note?.title ?? 'Notes')
   useViewTracking('notes', slug)
 
-  // Same-subject notes, fetched as soon as the subject is known. Safe to
-  // call unconditionally (before the loading/error returns below) since
-  // hooks must run in the same order every render.
-  const { data: related } = useAsync(
-    () => (note ? getNotes({ subject: note.subject }) : Promise.resolve([])),
-    [note?.subject],
-  )
-
   const [downloadCount, setDownloadCount] = useState<number | null>(null)
 
   if (loading) return <Loading label="Loading note…" />
   if (error) return <ErrorState message={error} onRetry={refetch} />
   if (!note) return null
 
-  const relatedNotes = (related ?? []).filter((n) => n.slug !== note.slug).slice(0, 3)
   const displayedDownloads = downloadCount ?? note.downloadCount
 
   function handleDownloadClick() {
@@ -84,21 +75,7 @@ export default function NoteDetail() {
 
       <FilePreview fileUrl={note.fileUrl} />
 
-      {relatedNotes.length > 0 && (
-        <div className="flex flex-col gap-4">
-          <h2 className="font-display text-lg font-semibold">More in {note.subject}</h2>
-          <div className="grid gap-4 sm:grid-cols-3">
-            {relatedNotes.map((n) => (
-              <Link key={n._id} to={`/notes/${n.slug}`}>
-                <GlassCard className="flex h-full flex-col gap-2 px-4 py-4 transition-transform hover:-translate-y-1">
-                  <h3 className="text-sm font-semibold leading-snug">{n.title}</h3>
-                  <p className="line-clamp-2 text-xs text-muted">{n.description}</p>
-                </GlassCard>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
+      <RelatedContent type="note" slug={note.slug} />
     </div>
   )
 }

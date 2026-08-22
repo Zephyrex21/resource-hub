@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { getTips, getMeta } from '../lib/api'
 import { useAsync } from '../hooks/useAsync'
 import { GlassCard } from '../components/ui/Card'
+import { TiltCard } from '../components/ui/TiltCard'
 import { Tag } from '../components/ui/Tag'
 import { SearchInput } from '../components/ui/SearchInput'
 import { FilterChips } from '../components/ui/FilterChips'
@@ -52,14 +53,16 @@ export default function TipsHub() {
         >
           {tips.map((tip) => (
             <motion.div key={tip._id} variants={itemVariants}>
-              <Link to={`/tips/${tip.slug}`}>
-                <GlassCard className="flex h-full flex-col gap-3 px-5 py-6 transition-transform hover:-translate-y-1">
-                  <Tag variant="tips">{tip.category}</Tag>
-                  <h2 className="font-display text-lg font-semibold leading-snug">{tip.title}</h2>
-                  <p className="line-clamp-3 text-sm text-muted">{tip.summary}</p>
-                  <span className="mt-auto text-xs font-medium text-accent-tips">Read guide →</span>
-                </GlassCard>
-              </Link>
+              <TiltCard>
+                <Link to={`/tips/${tip.slug}`}>
+                  <GlassCard className="flex h-full flex-col gap-3 px-5 py-6 transition-transform hover:-translate-y-1">
+                    <Tag variant="tips">{tip.category}</Tag>
+                    <h2 className="font-display text-lg font-semibold leading-snug">{tip.title}</h2>
+                    <p className="line-clamp-3 text-sm text-muted">{tip.summary}</p>
+                    <span className="mt-auto text-xs font-medium text-accent-tips">Read guide →</span>
+                  </GlassCard>
+                </Link>
+              </TiltCard>
             </motion.div>
           ))}
         </motion.div>

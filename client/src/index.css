@@ -115,3 +115,13 @@ body {
   outline-offset: 2px;
   border-radius: 4px;
 }
+
+/* ThemeToggle drives its own circular-reveal clip-path animation on the
+   ::view-transition-new(root) pseudo-element via the Web Animations API, so
+   the browser's default cross-fade (which would otherwise run at the same
+   time and muddy the effect) is disabled here. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}

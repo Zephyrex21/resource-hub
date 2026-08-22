@@ -7,6 +7,7 @@ import { ClayCard } from '../components/ui/Card'
 import { Tag } from '../components/ui/Tag'
 import { ShareButton } from '../components/ShareButton'
 import { BookmarkButton } from '../components/BookmarkButton'
+import { RelatedContent } from '../components/RelatedContent'
 import { Loading, ErrorState } from '../components/ui/StateViews'
 
 export default function ProjectDetail() {
@@ -82,6 +83,8 @@ export default function ProjectDetail() {
           <img src={project.coverImageUrl} alt={`${project.title} screenshot`} className="w-full" />
         </ClayCard>
       )}
+
+      <RelatedContent type="project" slug={project.slug} />
     </div>
   )
 }

@@ -76,6 +76,24 @@ export interface Stats {
   projects: number
 }
 
+export type RelatedContentType = 'note' | 'tip' | 'project'
+
+export interface RelatedItem {
+  type: RelatedContentType
+  _id: string
+  title: string
+  slug: string
+  description?: string
+  summary?: string
+  subject?: string
+  category?: string
+  status?: string
+  tags?: string[]
+  techStack?: string[]
+  difficulty?: string
+  featured?: boolean
+}
+
 export interface TopContent {
   notes: Pick<Note, '_id' | 'title' | 'slug' | 'subject' | 'viewCount'>[]
   tips: Pick<Tip, '_id' | 'title' | 'slug' | 'category' | 'viewCount'>[]
@@ -122,6 +140,9 @@ export const getTipBySlug = (slug: string) => request<Tip>(`/tips/${slug}`)
 export const getProjects = (params?: { status?: string; featured?: string; search?: string }) =>
   request<Project[]>(`/projects${buildQuery(params)}`)
 export const getProjectBySlug = (slug: string) => request<Project>(`/projects/${slug}`)
+
+export const getRelated = (type: RelatedContentType, slug: string, limit = 4) =>
+  request<RelatedItem[]>(`/related/${type}/${slug}${buildQuery({ limit: String(limit) })}`)
 
 export const search = (q: string) => request<SearchResults>(`/search${buildQuery({ q })}`)
 export const getStats = () => request<Stats>('/stats')

@@ -16,7 +16,9 @@ import { BookmarkButton } from '../components/BookmarkButton'
 import { FilePreview } from '../components/FilePreview'
 import { TableOfContents } from '../components/TableOfContents'
 import { ReadingProgressBar } from '../components/ReadingProgressBar'
+import { RelatedContent } from '../components/RelatedContent'
 import { Loading, ErrorState } from '../components/ui/StateViews'
+import { estimateReadingTime } from '../lib/readingTime'
 
 export default function TipDetail() {
   const { slug } = useParams<{ slug: string }>()
@@ -29,6 +31,7 @@ export default function TipDetail() {
   if (!tip) return null
 
   const headings = tip.contentMarkdown ? extractHeadings(tip.contentMarkdown) : []
+  const readingTime = tip.contentMarkdown ? estimateReadingTime(tip.contentMarkdown) : null
   let headingIndex = 0
 
   // Ids are pre-computed from the raw markdown source (see extractHeadings)
@@ -60,7 +63,10 @@ export default function TipDetail() {
       </div>
 
       <div className="flex flex-col gap-3">
-        <Tag variant="tips">{tip.category}</Tag>
+        <div className="flex items-center gap-2">
+          <Tag variant="tips">{tip.category}</Tag>
+          {readingTime && <span className="text-xs text-muted">· {readingTime} min read</span>}
+        </div>
         <h1 className="font-display text-3xl font-bold">{tip.title}</h1>
         <p className="text-muted">{tip.summary}</p>
 
@@ -101,6 +107,8 @@ export default function TipDetail() {
           <FilePreview fileUrl={tip.fileUrl} />
         </>
       )}
+
+      <RelatedContent type="tip" slug={tip.slug} />
     </div>
   )
 }

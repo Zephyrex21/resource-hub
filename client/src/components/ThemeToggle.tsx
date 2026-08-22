@@ -1,12 +1,44 @@
+import { useRef } from 'react'
 import { useTheme } from '../context/ThemeContext'
 
+// Wraps the theme flip in the View Transitions API so the swap animates as
+// a circle expanding from the button itself, instead of an instant snap.
+// Browsers without support (Firefox, older Safari) just get the plain
+// instant toggle — this is a progressive enhancement, not a dependency.
 export default function ThemeToggle() {
   const { theme, toggleTheme } = useTheme()
   const isDark = theme === 'dark'
+  const buttonRef = useRef<HTMLButtonElement>(null)
+
+  function handleClick() {
+    const supportsViewTransitions =
+      typeof document !== 'undefined' && 'startViewTransition' in document
+    const prefersReducedMotion =
+      typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    if (!supportsViewTransitions || prefersReducedMotion) {
+      toggleTheme()
+      return
+    }
+
+    const rect = buttonRef.current?.getBoundingClientRect()
+    const x = rect ? rect.left + rect.width / 2 : window.innerWidth / 2
+    const y = rect ? rect.top + rect.height / 2 : window.innerHeight / 2
+    const maxRadius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y))
+
+    const transition = document.startViewTransition(() => toggleTheme())
+    transition.ready.then(() => {
+      document.documentElement.animate(
+        { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${maxRadius}px at ${x}px ${y}px)`] },
+        { duration: 500, easing: 'ease-in-out', pseudoElement: '::view-transition-new(root)' },
+      )
+    })
+  }
 
   return (
     <button
-      onClick={toggleTheme}
+      ref={buttonRef}
+      onClick={handleClick}
       aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
       className="clay-btn flex h-9 w-9 items-center justify-center rounded-full text-text transition-transform hover:scale-105 active:scale-95"
     >

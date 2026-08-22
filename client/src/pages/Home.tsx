@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import { ClayCard, GlassCard } from '../components/ui/Card'
 import { HeroIllustration } from '../components/HeroIllustration'
 import { TypewriterHeading } from '../components/TypewriterHeading'
@@ -55,6 +55,16 @@ export default function Home() {
   const { data: stats } = useAsync(getStats, [])
   const [statsInView, setStatsInView] = useState(false)
 
+  // Scroll-driven parallax: the hero illustration drifts up and fades
+  // slightly faster than the page scrolls, and the text column drifts the
+  // opposite direction a touch — a subtle depth cue as the user scrolls
+  // past the hero, rather than the whole section moving as one flat block.
+  const heroRef = useRef<HTMLElement>(null)
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] })
+  const illustrationY = useTransform(scrollYProgress, [0, 1], [0, -60])
+  const illustrationOpacity = useTransform(scrollYProgress, [0, 1], [1, 0.4])
+  const textY = useTransform(scrollYProgress, [0, 1], [0, 24])
+
   const statItems = [
     { label: 'Notes', value: stats?.notes },
     { label: 'Tips & Tricks', value: stats?.tips },
@@ -64,8 +74,8 @@ export default function Home() {
   return (
     <div className="flex flex-col gap-24 sm:gap-28">
       {/* Hero */}
-      <section className="grid items-center gap-10 pt-6 lg:grid-cols-2 lg:gap-6">
-        <div className="flex flex-col items-start gap-6 text-left">
+      <motion.section ref={heroRef} className="grid items-center gap-10 pt-6 lg:grid-cols-2 lg:gap-6">
+        <motion.div style={{ y: textY }} className="flex flex-col items-start gap-6 text-left">
           <motion.span
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -110,17 +120,18 @@ export default function Home() {
               </Link>
             </motion.div>
           </motion.div>
-        </div>
+        </motion.div>
 
         <motion.div
           initial={{ opacity: 0, scale: 0.94 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, ease: 'easeOut', delay: 0.3 }}
+          style={{ y: illustrationY, opacity: illustrationOpacity }}
           className="mx-auto w-full max-w-md lg:max-w-none"
         >
           <HeroIllustration />
         </motion.div>
-      </section>
+      </motion.section>
 
       {/* Real stats — no vanity numbers, just what's actually here — count up into view */}
       <motion.section

@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.51.1",
     "docx-preview": "^0.4.0",
     "framer-motion": "^11.3.19",
     "highlight.js": "^11.10.0",
@@ -18,7 +19,8 @@
     "react-pdf": "^9.1.1",
     "react-router-dom": "^6.24.1",
     "rehype-highlight": "^7.0.0",
-    "remark-gfm": "^4.0.0"
+    "remark-gfm": "^4.0.0",
+    "zustand": "^4.5.4"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",
