@@ -4,46 +4,47 @@
 @tailwind components;
 @tailwind utilities;
 
+/* takeuforward-style palette: bright orange brand accent on a clean white/
+   light-gray surface, flat bordered cards instead of glassmorphism, and
+   dedicated easy/medium/hard tokens reused for the Note difficulty field. */
 :root {
-  --color-bg: #f5f6fa;
+  --color-bg: #f7f7f8;
   --color-surface: #ffffff;
-  --color-text: #14141a;
-  --color-text-muted: #5b5f6d;
-  --color-border: rgba(20, 20, 26, 0.08);
+  --color-text: #16181d;
+  --color-text-muted: #666b78;
+  --color-border: rgba(22, 24, 29, 0.1);
 
-  --color-accent: 101 75 206;
-  --color-accent-notes: 101 75 206;
-  --color-accent-tips: 142 96 20;
-  --color-accent-projects: 21 114 109;
+  --color-accent: 255 107 0;
+  --color-accent-notes: 255 107 0;
+  --color-accent-tips: 255 107 0;
+  --color-accent-projects: 255 107 0;
 
-  --glass-bg: rgba(255, 255, 255, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.5);
-  --glass-blur: 16px;
+  --color-easy: 22 163 74;
+  --color-medium: 217 119 6;
+  --color-hard: 220 38 38;
 
-  --clay-shadow:
-    8px 8px 20px rgba(163, 177, 198, 0.45),
-    -8px -8px 20px rgba(255, 255, 255, 0.8);
+  --card-shadow: 0 1px 2px rgba(16, 18, 22, 0.04);
+  --card-shadow-hover: 0 4px 14px rgba(16, 18, 22, 0.08);
 }
 
 .dark {
-  --color-bg: #0b0d12;
-  --color-surface: #14161d;
-  --color-text: #f1f1f4;
-  --color-text-muted: #9a9ca8;
-  --color-border: rgba(255, 255, 255, 0.08);
+  --color-bg: #0e1013;
+  --color-surface: #16181d;
+  --color-text: #f2f3f5;
+  --color-text-muted: #9498a3;
+  --color-border: rgba(255, 255, 255, 0.09);
 
-  --color-accent: 155 130 255;
-  --color-accent-notes: 155 130 255;
-  --color-accent-tips: 255 194 102;
-  --color-accent-projects: 79 216 206;
+  --color-accent: 255 138 61;
+  --color-accent-notes: 255 138 61;
+  --color-accent-tips: 255 138 61;
+  --color-accent-projects: 255 138 61;
 
-  --glass-bg: rgba(20, 22, 29, 0.55);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-blur: 16px;
+  --color-easy: 74 222 128;
+  --color-medium: 251 191 36;
+  --color-hard: 248 113 113;
 
-  --clay-shadow:
-    8px 8px 20px rgba(0, 0, 0, 0.5),
-    -8px -8px 20px rgba(255, 255, 255, 0.03);
+  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --card-shadow-hover: 0 4px 14px rgba(0, 0, 0, 0.35);
 }
 
 body {
@@ -51,22 +52,29 @@ body {
 }
 
 @layer components {
+  /* Kept the .glass-card / .clay-card / .clay-btn class names so every page
+     that already uses them (Navbar, buttons, detail pages) gets the new flat
+     look for free — no per-component churn needed for the re-theme. */
   .glass-card {
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    backdrop-filter: blur(var(--glass-blur));
-    -webkit-backdrop-filter: blur(var(--glass-blur));
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--card-shadow);
   }
 
   .clay-card {
     background: var(--color-surface);
-    box-shadow: var(--clay-shadow);
     border: 1px solid var(--color-border);
+    box-shadow: var(--card-shadow);
   }
 
   .clay-btn {
     background: var(--color-surface);
-    box-shadow: var(--clay-shadow);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--card-shadow);
+  }
+
+  .clay-btn:hover {
+    box-shadow: var(--card-shadow-hover);
   }
 
   /* Rendered Markdown (Tips content) */

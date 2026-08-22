@@ -3,7 +3,6 @@ import { motion } from 'framer-motion'
 import { useQuery } from '@tanstack/react-query'
 import { getRelated, type RelatedContentType } from '../lib/api'
 import { GlassCard } from './ui/Card'
-import { TiltCard } from './ui/TiltCard'
 import { Tag } from './ui/Tag'
 import { containerVariants, itemVariants } from './motionVariants'
 
@@ -55,15 +54,13 @@ export function RelatedContent({ type, slug, heading = 'You might also like' }: 
       >
         {data.map((item) => (
           <motion.div key={`${item.type}-${item.slug}`} variants={itemVariants}>
-            <TiltCard>
-              <Link to={`${TYPE_ROUTE[item.type]}/${item.slug}`}>
-                <GlassCard className="flex h-full flex-col gap-2 px-4 py-4 transition-transform hover:-translate-y-1">
-                  <Tag variant={TYPE_TAG_VARIANT[item.type]}>{TYPE_LABEL[item.type]}</Tag>
-                  <h3 className="text-sm font-semibold leading-snug">{item.title}</h3>
-                  <p className="line-clamp-2 text-xs text-muted">{item.description || item.summary}</p>
-                </GlassCard>
-              </Link>
-            </TiltCard>
+            <Link to={`${TYPE_ROUTE[item.type]}/${item.slug}`}>
+              <GlassCard className="flex h-full flex-col gap-2 px-4 py-4 transition-shadow hover:shadow-[var(--card-shadow-hover)]">
+                <Tag variant={TYPE_TAG_VARIANT[item.type]}>{TYPE_LABEL[item.type]}</Tag>
+                <h3 className="text-sm font-semibold leading-snug">{item.title}</h3>
+                <p className="line-clamp-2 text-xs text-muted">{item.description || item.summary}</p>
+              </GlassCard>
+            </Link>
           </motion.div>
         ))}
       </motion.div>

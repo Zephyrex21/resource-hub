@@ -8,6 +8,7 @@ import { ThemeProvider } from './context/ThemeContext'
 import { AuthProvider } from './context/AuthContext'
 import { ToastProvider } from './context/ToastContext'
 import { BookmarksProvider } from './context/BookmarksContext'
+import { ProgressProvider } from './context/ProgressContext'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { queryClient } from './lib/queryClient'
 import './index.css'
@@ -22,7 +23,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               <AuthProvider>
                 <ToastProvider>
                   <BookmarksProvider>
-                    <App />
+                    <ProgressProvider>
+                      <App />
+                    </ProgressProvider>
                   </BookmarksProvider>
                 </ToastProvider>
               </AuthProvider>

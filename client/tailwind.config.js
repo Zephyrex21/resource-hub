@@ -14,9 +14,12 @@ export default {
         'accent-notes': 'rgb(var(--color-accent-notes) / <alpha-value>)',
         'accent-tips': 'rgb(var(--color-accent-tips) / <alpha-value>)',
         'accent-projects': 'rgb(var(--color-accent-projects) / <alpha-value>)',
+        easy: 'rgb(var(--color-easy) / <alpha-value>)',
+        medium: 'rgb(var(--color-medium) / <alpha-value>)',
+        hard: 'rgb(var(--color-hard) / <alpha-value>)',
       },
       fontFamily: {
-        display: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
+        display: ['"Poppins"', 'system-ui', 'sans-serif'],
         body: ['"Inter"', 'system-ui', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'monospace'],
       },

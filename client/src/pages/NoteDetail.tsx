@@ -5,6 +5,8 @@ import { useAsync } from '../hooks/useAsync'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { useViewTracking } from '../hooks/useViewTracking'
 import { Tag } from '../components/ui/Tag'
+import { DifficultyBadge } from '../components/ui/DifficultyBadge'
+import { ProgressCheckbox } from '../components/ProgressCheckbox'
 import { ShareButton } from '../components/ShareButton'
 import { BookmarkButton } from '../components/BookmarkButton'
 import { FilePreview } from '../components/FilePreview'
@@ -36,7 +38,8 @@ export default function NoteDetail() {
         <Link to="/notes" className="w-fit text-sm text-muted hover:text-text">
           ← Back to Notes
         </Link>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
+          <ProgressCheckbox type="note" slug={note.slug} size="md" />
           <BookmarkButton type="note" slug={note.slug} title={note.title} subtitle={note.subject} />
           <ShareButton />
         </div>
@@ -53,8 +56,8 @@ export default function NoteDetail() {
               {tag}
             </Tag>
           ))}
-          <span className="ml-auto text-xs uppercase tracking-wide text-muted">
-            {note.difficulty}
+          <span className="ml-auto">
+            <DifficultyBadge difficulty={note.difficulty} />
           </span>
         </div>
       </div>

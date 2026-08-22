@@ -3,7 +3,6 @@ import { Outlet, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
-import ParticleBackground from '../components/ParticleBackground'
 import CommandPalette from '../components/CommandPalette'
 import { PageTransition } from '../components/PageTransition'
 import { useUIStore } from '../store/uiStore'
@@ -28,7 +27,6 @@ export default function RootLayout() {
 
   return (
     <div className="relative flex min-h-screen flex-col bg-bg font-body text-text transition-colors">
-      <ParticleBackground />
       <Navbar />
       <CommandPalette
         open={commandPaletteOpen}

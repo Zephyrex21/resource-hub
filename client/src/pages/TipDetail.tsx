@@ -19,6 +19,7 @@ import { ReadingProgressBar } from '../components/ReadingProgressBar'
 import { RelatedContent } from '../components/RelatedContent'
 import { Loading, ErrorState } from '../components/ui/StateViews'
 import { estimateReadingTime } from '../lib/readingTime'
+import { ProgressCheckbox } from '../components/ProgressCheckbox'
 
 export default function TipDetail() {
   const { slug } = useParams<{ slug: string }>()
@@ -56,7 +57,8 @@ export default function TipDetail() {
         <Link to="/tips" className="w-fit text-sm text-muted hover:text-text">
           ← Back to Tips
         </Link>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
+          <ProgressCheckbox type="tip" slug={tip.slug} size="md" />
           <BookmarkButton type="tip" slug={tip.slug} title={tip.title} subtitle={tip.category} />
           <ShareButton />
         </div>

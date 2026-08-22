@@ -33,3 +33,26 @@ Phase 1 — Resource data models and APIs.
 
 ### Next
 Ask-AI panel over site content; magnetic effects on remaining interactive elements; consider full useAsync → React Query migration.
+
+## 2026-08-22 — Visual redesign: takeuforward-inspired UI
+
+Same architecture, new personality — swapped the dark-capable glassmorphism/
+claymorphism look (purple accent, ambient particle background, floating
+cards, magnetic tilt) for a flat, content-dense, utility-first study-tool
+look modeled on takeuforward.org.
+
+- **Palette & type**
+  - Single bright orange brand accent (`#FF6B00` light / `#FF8A3D` dark) replacing the purple/gold/teal three-accent system
+  - New `easy`/`medium`/`hard` color tokens (green/amber/red), reused for the existing Note `difficulty` field via a new `DifficultyBadge`
+  - Display font swapped Space Grotesk → Poppins; flat bordered `.glass-card`/`.clay-card`/`.clay-btn` styles replacing blur/shadow-based glass and clay
+- **Layout**
+  - Notes and Tips hubs rebuilt from a 3-column card grid into collapsible, subject/category-grouped row lists (accordion sections, hairline-divided rows) — closer to a problem-sheet than a card wall
+  - Projects grid and related-content cards reskinned flat (kept as a grid — projects showcase better that way than as rows)
+- **Progress tracking**
+  - New `ProgressContext` (localStorage-backed, same pattern as the existing Bookmarks feature — no accounts/backend needed) powers a per-row "mark as done" checkbox and a per-subject/category completion bar, plus an overall done-count on each hub page and the checkbox on Note/Tip detail headers
+- **Motion**
+  - Removed all ambient/looping animation: the particle background, the hero illustration's floating/pulsing/flowing-dash effects (now a static illustration), and a looping pulse dot on Home — motion is now functional only (accordion expand, hover, entrance)
+  - Removed `TiltCard`'s magnetic hover effect from grids — didn't fit the flat aesthetic
+
+### Next
+Ask-AI panel over site content; consider full useAsync → React Query migration.

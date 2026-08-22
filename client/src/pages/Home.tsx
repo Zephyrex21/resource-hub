@@ -166,11 +166,7 @@ export default function Home() {
             <motion.div key={s.to} variants={itemVariants} whileHover={{ y: -4 }}>
               <Link to={s.to}>
                 <GlassCard className="h-full px-6 py-8 text-left">
-                  <motion.span
-                    className={`inline-block h-2.5 w-2.5 rounded-full ${s.dot}`}
-                    animate={{ scale: [1, 1.3, 1] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                  />
+                  <span className={`inline-block h-2.5 w-2.5 rounded-full ${s.dot}`} />
                   <h3 className={`mt-3 font-display text-xl font-semibold ${s.accent}`}>{s.title}</h3>
                   <p className="mt-2 text-sm text-muted">{s.description}</p>
                 </GlassCard>
