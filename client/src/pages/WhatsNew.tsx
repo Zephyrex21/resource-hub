@@ -63,7 +63,7 @@ export default function WhatsNew() {
             const meta = feedMeta(item)
             return (
               <Link key={`${item.kind}-${item.data._id}`} to={feedLink(item)}>
-                <GlassCard className="flex flex-wrap items-center gap-3 px-5 py-4 transition-transform hover:-translate-y-0.5">
+                <GlassCard className="flex flex-wrap items-center gap-3 px-5 py-4 transition-colors hover:bg-bg">
                   <Tag variant={meta.variant}>{meta.badge}</Tag>
                   <span className="min-w-0 flex-1 truncate text-sm font-medium">{item.data.title}</span>
                   <span className="shrink-0 text-xs capitalize text-muted">{item.kind}</span>

@@ -12,8 +12,8 @@ export default defineConfig({
         name: 'Resource Hub',
         short_name: 'Resource Hub',
         description: 'A personal developer resource hub — notes, tips & tricks, and projects.',
-        theme_color: '#654bce',
-        background_color: '#f5f6fa',
+        theme_color: '#FF6B00',
+        background_color: '#f7f7f8',
         display: 'standalone',
         start_url: '/',
         icons: [
