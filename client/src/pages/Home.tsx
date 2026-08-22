@@ -1,9 +1,12 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ClayCard, GlassCard } from '../components/ui/Card'
 import { HeroIllustration } from '../components/HeroIllustration'
+import { TypewriterHeading } from '../components/TypewriterHeading'
 import { getStats } from '../lib/api'
 import { useAsync } from '../hooks/useAsync'
+import { useCountUp } from '../hooks/useCountUp'
 import { containerVariants, itemVariants } from '../components/motionVariants'
 import { usePageTitle } from '../hooks/usePageTitle'
 
@@ -31,9 +34,26 @@ const sections = [
   },
 ]
 
+const headingLines = [
+  { text: 'Your developer' },
+  { text: 'knowledge base,' },
+  { text: 'hosted & readable.', accent: true },
+]
+
+function StatCounter({ label, value, active }: { label: string; value: number | undefined; active: boolean }) {
+  const count = useCountUp(value, active)
+  return (
+    <motion.div variants={itemVariants} className="flex flex-col items-center gap-1 text-center">
+      <span className="font-display text-2xl font-bold sm:text-3xl">{value === undefined ? '—' : count}</span>
+      <span className="text-xs text-muted sm:text-sm">{label}</span>
+    </motion.div>
+  )
+}
+
 export default function Home() {
   usePageTitle('Home')
   const { data: stats } = useAsync(getStats, [])
+  const [statsInView, setStatsInView] = useState(false)
 
   const statItems = [
     { label: 'Notes', value: stats?.notes },
@@ -45,70 +65,74 @@ export default function Home() {
     <div className="flex flex-col gap-24 sm:gap-28">
       {/* Hero */}
       <section className="grid items-center gap-10 pt-6 lg:grid-cols-2 lg:gap-6">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: 'easeOut' }}
-          className="flex flex-col items-start gap-6 text-left"
-        >
-          <span className="glass-card rounded-full px-4 py-1.5 text-xs font-medium text-muted">
+        <div className="flex flex-col items-start gap-6 text-left">
+          <motion.span
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="glass-card rounded-full px-4 py-1.5 text-xs font-medium text-muted"
+          >
             Notes · Tips &amp; Tricks · Projects — all in one place
-          </span>
+          </motion.span>
 
-          <h1 className="font-display text-4xl font-bold leading-[1.1] tracking-tight sm:text-5xl">
-            Your developer
-            <br />
-            knowledge base,
-            <br />
-            <span className="text-accent">hosted &amp; readable.</span>
-          </h1>
+          <TypewriterHeading
+            lines={headingLines}
+            className="font-display text-4xl font-bold leading-[1.1] tracking-tight sm:text-5xl"
+          />
 
-          <p className="max-w-md text-muted">
+          <motion.p
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: 1.5 }}
+            className="max-w-md text-muted"
+          >
             A personal resource hub — study notes I wrote, tricks I figured out, and projects
             I've actually shipped. Read in-browser, not just linked out.
-          </p>
+          </motion.p>
 
-          <div className="flex flex-wrap gap-3">
-            <Link
-              to="/notes"
-              className="rounded-full bg-accent px-6 py-3 text-sm font-medium text-white transition-transform hover:-translate-y-0.5"
-            >
-              Browse Notes
-            </Link>
-            <Link
-              to="/projects"
-              className="clay-btn rounded-full px-6 py-3 text-sm font-medium text-text transition-transform hover:-translate-y-0.5"
-            >
-              View Projects
-            </Link>
-          </div>
-        </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: 1.7 }}
+            className="flex flex-wrap gap-3"
+          >
+            <motion.div whileHover={{ y: -3, scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              <Link
+                to="/notes"
+                className="block rounded-full bg-accent px-6 py-3 text-sm font-medium text-white"
+              >
+                Browse Notes
+              </Link>
+            </motion.div>
+            <motion.div whileHover={{ y: -3, scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              <Link to="/projects" className="clay-btn block rounded-full px-6 py-3 text-sm font-medium text-text">
+                View Projects
+              </Link>
+            </motion.div>
+          </motion.div>
+        </div>
 
         <motion.div
           initial={{ opacity: 0, scale: 0.94 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }}
+          transition={{ duration: 0.5, ease: 'easeOut', delay: 0.3 }}
           className="mx-auto w-full max-w-md lg:max-w-none"
         >
           <HeroIllustration />
         </motion.div>
       </section>
 
-      {/* Real stats — no vanity numbers, just what's actually here */}
+      {/* Real stats — no vanity numbers, just what's actually here — count up into view */}
       <motion.section
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, amount: 0.4 }}
+        onViewportEnter={() => setStatsInView(true)}
         variants={containerVariants}
       >
         <ClayCard className="grid grid-cols-3 divide-x divide-border px-4 py-6 sm:px-8">
           {statItems.map((item) => (
-            <motion.div key={item.label} variants={itemVariants} className="flex flex-col items-center gap-1 text-center">
-              <span className="font-display text-2xl font-bold sm:text-3xl">
-                {item.value ?? '—'}
-              </span>
-              <span className="text-xs text-muted sm:text-sm">{item.label}</span>
-            </motion.div>
+            <StatCounter key={item.label} label={item.label} value={item.value} active={statsInView} />
           ))}
         </ClayCard>
       </motion.section>
@@ -128,10 +152,14 @@ export default function Home() {
 
         <div className="grid gap-5 sm:grid-cols-3">
           {sections.map((s) => (
-            <motion.div key={s.to} variants={itemVariants}>
+            <motion.div key={s.to} variants={itemVariants} whileHover={{ y: -4 }}>
               <Link to={s.to}>
-                <GlassCard className="h-full px-6 py-8 text-left transition-transform hover:-translate-y-1">
-                  <span className={`inline-block h-2.5 w-2.5 rounded-full ${s.dot}`} />
+                <GlassCard className="h-full px-6 py-8 text-left">
+                  <motion.span
+                    className={`inline-block h-2.5 w-2.5 rounded-full ${s.dot}`}
+                    animate={{ scale: [1, 1.3, 1] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                  />
                   <h3 className={`mt-3 font-display text-xl font-semibold ${s.accent}`}>{s.title}</h3>
                   <p className="mt-2 text-sm text-muted">{s.description}</p>
                 </GlassCard>
