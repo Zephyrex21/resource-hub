@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getTips, getMeta, type Tip } from '../lib/api'
 import { useAsync } from '../hooks/useAsync'
@@ -109,8 +109,13 @@ function CategoryGroup({ category, tips }: { category: string; tips: Tip[] }) {
 
 export default function TipsHub() {
   usePageTitle('Tips')
-  const [category, setCategory] = useState('')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const category = searchParams.get('category') ?? ''
   const [search, setSearch] = useState('')
+
+  function setCategory(next: string) {
+    setSearchParams(next ? { category: next } : {}, { replace: true })
+  }
 
   const { data: meta } = useAsync(getMeta, [])
   const { data: tips, loading, error, refetch } = useAsync(

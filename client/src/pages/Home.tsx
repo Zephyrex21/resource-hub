@@ -1,10 +1,12 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { ClayCard, GlassCard } from '../components/ui/Card'
 import { HeroIllustration } from '../components/HeroIllustration'
 import { TypewriterHeading } from '../components/TypewriterHeading'
-import { getStats } from '../lib/api'
+import { DifficultyBadge } from '../components/ui/DifficultyBadge'
+import { getStats, getMeta, getTopContent, getNotes, getTips, getProjects } from '../lib/api'
+import type { Note, Tip, Project } from '../lib/api'
 import { useAsync } from '../hooks/useAsync'
 import { useCountUp } from '../hooks/useCountUp'
 import { containerVariants, itemVariants } from '../components/motionVariants'
@@ -34,6 +36,33 @@ const sections = [
   },
 ]
 
+const features = [
+  {
+    title: 'Read in-browser',
+    description: 'PDFs and DOCX render right on the page — no download-then-open detour.',
+    icon: (
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20 M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z" />
+    ),
+  },
+  {
+    title: 'Track your progress',
+    description: 'Mark notes and tips as done, and watch a real completion bar fill in per topic.',
+    icon: <path d="m9 12 2 2 4-4 M21 12a9 9 0 1 1-9-9 9 9 0 0 1 9 9Z" />,
+  },
+  {
+    title: 'Smart related content',
+    description: 'Every page links to genuinely related notes, tips, and projects — not just same-category filler.',
+    icon: (
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71 M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+    ),
+  },
+  {
+    title: 'Works offline',
+    description: 'Installable as an app — previously visited pages stay readable without a connection.',
+    icon: <path d="M5 12.55a11 11 0 0 1 14.08 0 M1.42 9a16 16 0 0 1 21.16 0 M8.53 16.11a6 6 0 0 1 6.95 0 M12 20h.01" />,
+  },
+]
+
 const headingLines = [
   { text: 'Your developer' },
   { text: 'knowledge base,' },
@@ -50,9 +79,38 @@ function StatCounter({ label, value, active }: { label: string; value: number | 
   )
 }
 
+function FeatureIcon({ children }: { children: ReactNode }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      {children}
+    </svg>
+  )
+}
+
+function TrendingRow({ title, meta, viewCount, to }: { title: string; meta: string; viewCount: number; to: string }) {
+  return (
+    <Link to={to} className="flex items-center gap-3 border-b border-border px-4 py-3 transition-colors last:border-b-0 hover:bg-bg">
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium text-text">{title}</p>
+        <p className="mt-0.5 truncate text-xs text-muted">{meta}</p>
+      </div>
+      <span className="shrink-0 text-xs text-muted">{viewCount} views</span>
+    </Link>
+  )
+}
+
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+}
+
 export default function Home() {
   usePageTitle('Home')
   const { data: stats } = useAsync(getStats, [])
+  const { data: meta } = useAsync(getMeta, [])
+  const { data: top } = useAsync(getTopContent, [])
+  const { data: notes } = useAsync(() => getNotes(), [])
+  const { data: tips } = useAsync(() => getTips(), [])
+  const { data: projects } = useAsync(() => getProjects(), [])
   const [statsInView, setStatsInView] = useState(false)
 
   // Scroll-driven parallax: the hero illustration drifts up and fades
@@ -71,8 +129,21 @@ export default function Home() {
     { label: 'Projects', value: stats?.projects },
   ]
 
+  const latest: Array<{ kind: 'note' | 'tip' | 'project'; data: Note | Tip | Project }> = [
+    ...(notes ?? []).map((data) => ({ kind: 'note' as const, data })),
+    ...(tips ?? []).map((data) => ({ kind: 'tip' as const, data })),
+    ...(projects ?? []).map((data) => ({ kind: 'project' as const, data })),
+  ]
+    .sort((a, b) => new Date(b.data.createdAt).getTime() - new Date(a.data.createdAt).getTime())
+    .slice(0, 4)
+
+  const featuredProjects = (projects ?? [])
+    .filter((p) => p.featured)
+    .sort((a, b) => a.order - b.order)
+    .slice(0, 3)
+
   return (
-    <div className="flex flex-col gap-24 sm:gap-28">
+    <div className="flex flex-col gap-20 sm:gap-24">
       {/* Hero */}
       <motion.section ref={heroRef} className="grid items-center gap-10 pt-6 lg:grid-cols-2 lg:gap-6">
         <motion.div style={{ y: textY }} className="flex flex-col items-start gap-6 text-left">
@@ -174,6 +245,200 @@ export default function Home() {
             </motion.div>
           ))}
         </div>
+      </motion.section>
+
+      {/* Browse by subject — deep-links straight into a filtered Notes list */}
+      {meta && meta.noteSubjects.length > 0 && (
+        <motion.section
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={containerVariants}
+          className="flex flex-col gap-6"
+        >
+          <div className="flex items-end justify-between">
+            <div>
+              <h2 className="font-display text-2xl font-bold sm:text-3xl">Browse by subject</h2>
+              <p className="mt-2 text-sm text-muted">Jump straight to the topic you're studying.</p>
+            </div>
+            <Link to="/notes" className="hidden shrink-0 text-sm font-medium text-accent hover:underline sm:block">
+              View all →
+            </Link>
+          </div>
+
+          <motion.div variants={itemVariants} className="flex flex-wrap gap-2.5">
+            {meta.noteSubjects.map((subject) => (
+              <Link
+                key={subject}
+                to={`/notes?subject=${encodeURIComponent(subject)}`}
+                className="clay-btn rounded-full px-4 py-2 text-sm font-medium text-text transition-colors hover:text-accent"
+              >
+                {subject}
+              </Link>
+            ))}
+          </motion.div>
+        </motion.section>
+      )}
+
+      {/* Trending — real viewCount ranking, not curated */}
+      {top && (top.notes.length > 0 || top.tips.length > 0) && (
+        <motion.section
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={containerVariants}
+          className="flex flex-col gap-6"
+        >
+          <div className="text-center">
+            <h2 className="font-display text-2xl font-bold sm:text-3xl">Trending right now</h2>
+            <p className="mt-2 text-sm text-muted">Ranked by actual view count.</p>
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2">
+            {top.notes.length > 0 && (
+              <motion.div variants={itemVariants} className="overflow-hidden rounded-2xl border border-border bg-surface">
+                <p className="border-b border-border px-4 py-3 font-display text-sm font-semibold">Top Notes</p>
+                {top.notes.map((n) => (
+                  <TrendingRow key={n._id} title={n.title} meta={n.subject} viewCount={n.viewCount} to={`/notes/${n.slug}`} />
+                ))}
+              </motion.div>
+            )}
+            {top.tips.length > 0 && (
+              <motion.div variants={itemVariants} className="overflow-hidden rounded-2xl border border-border bg-surface">
+                <p className="border-b border-border px-4 py-3 font-display text-sm font-semibold">Top Tips</p>
+                {top.tips.map((t) => (
+                  <TrendingRow key={t._id} title={t.title} meta={t.category} viewCount={t.viewCount} to={`/tips/${t.slug}`} />
+                ))}
+              </motion.div>
+            )}
+          </div>
+        </motion.section>
+      )}
+
+      {/* Featured projects */}
+      {featuredProjects.length > 0 && (
+        <motion.section
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={containerVariants}
+          className="flex flex-col gap-6"
+        >
+          <div className="flex items-end justify-between">
+            <div>
+              <h2 className="font-display text-2xl font-bold sm:text-3xl">Featured projects</h2>
+              <p className="mt-2 text-sm text-muted">Shipped work — source and live demos.</p>
+            </div>
+            <Link to="/projects" className="hidden shrink-0 text-sm font-medium text-accent hover:underline sm:block">
+              View all →
+            </Link>
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-3">
+            {featuredProjects.map((project) => (
+              <motion.div key={project._id} variants={itemVariants}>
+                <Link to={`/projects/${project.slug}`}>
+                  <GlassCard className="flex h-full flex-col gap-2 px-5 py-6 transition-shadow hover:shadow-[var(--card-shadow-hover)]">
+                    <h3 className="font-display text-base font-semibold leading-snug">{project.title}</h3>
+                    <p className="line-clamp-2 text-sm text-muted">{project.description}</p>
+                    <div className="mt-auto flex flex-wrap gap-1.5 pt-2">
+                      {project.techStack.slice(0, 3).map((tech) => (
+                        <span key={tech} className="rounded-full bg-border px-2 py-0.5 text-[11px] text-muted">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </GlassCard>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
+      )}
+
+      {/* Latest additions — teaser feed, full list lives on What's New */}
+      {latest.length > 0 && (
+        <motion.section
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={containerVariants}
+          className="flex flex-col gap-6"
+        >
+          <div className="flex items-end justify-between">
+            <div>
+              <h2 className="font-display text-2xl font-bold sm:text-3xl">Latest additions</h2>
+              <p className="mt-2 text-sm text-muted">Freshly added notes, tips, and projects.</p>
+            </div>
+            <Link to="/whats-new" className="hidden shrink-0 text-sm font-medium text-accent hover:underline sm:block">
+              View all →
+            </Link>
+          </div>
+
+          <motion.div variants={itemVariants} className="overflow-hidden rounded-2xl border border-border bg-surface">
+            {latest.map((item) => {
+              const to =
+                item.kind === 'note' ? `/notes/${item.data.slug}` : item.kind === 'tip' ? `/tips/${item.data.slug}` : `/projects/${item.data.slug}`
+              return (
+                <Link
+                  key={`${item.kind}-${item.data._id}`}
+                  to={to}
+                  className="flex items-center gap-3 border-b border-border px-4 py-3 transition-colors last:border-b-0 hover:bg-bg"
+                >
+                  <span className="shrink-0 rounded-md bg-border px-2 py-0.5 text-[11px] capitalize text-muted">{item.kind}</span>
+                  <span className="min-w-0 flex-1 truncate text-sm font-medium">{item.data.title}</span>
+                  <span className="shrink-0 text-xs text-muted">{formatDate(item.data.createdAt)}</span>
+                </Link>
+              )
+            })}
+          </motion.div>
+        </motion.section>
+      )}
+
+      {/* Why this hub */}
+      <motion.section
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.3 }}
+        variants={containerVariants}
+        className="flex flex-col gap-6"
+      >
+        <div className="text-center">
+          <h2 className="font-display text-2xl font-bold sm:text-3xl">Why this hub</h2>
+          <p className="mt-2 text-sm text-muted">Built to actually be used, not just linked to.</p>
+        </div>
+
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {features.map((f) => (
+            <motion.div key={f.title} variants={itemVariants}>
+              <GlassCard className="flex h-full flex-col gap-3 px-5 py-6">
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent/10 text-accent">
+                  <FeatureIcon>{f.icon}</FeatureIcon>
+                </span>
+                <h3 className="font-display text-sm font-semibold">{f.title}</h3>
+                <p className="text-xs text-muted">{f.description}</p>
+              </GlassCard>
+            </motion.div>
+          ))}
+        </div>
+      </motion.section>
+
+      {/* Closing CTA */}
+      <motion.section
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.4 }}
+        variants={itemVariants}
+      >
+        <ClayCard className="flex flex-col items-center gap-4 px-8 py-12 text-center sm:py-14">
+          <h2 className="font-display text-2xl font-bold sm:text-3xl">Ready to dive in?</h2>
+          <p className="max-w-md text-sm text-muted">
+            Pick up where a subject left off, or browse everything from scratch.
+          </p>
+          <Link to="/notes" className="rounded-full bg-accent px-6 py-3 text-sm font-medium text-white">
+            Browse Notes
+          </Link>
+        </ClayCard>
       </motion.section>
     </div>
   )

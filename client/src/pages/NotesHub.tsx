@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getNotes, getMeta, type Note } from '../lib/api'
 import { useAsync } from '../hooks/useAsync'
@@ -106,8 +106,13 @@ function SubjectGroup({ subject, notes }: { subject: string; notes: Note[] }) {
 
 export default function NotesHub() {
   usePageTitle('Notes')
-  const [subject, setSubject] = useState('')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const subject = searchParams.get('subject') ?? ''
   const [search, setSearch] = useState('')
+
+  function setSubject(next: string) {
+    setSearchParams(next ? { subject: next } : {}, { replace: true })
+  }
 
   const { data: meta } = useAsync(getMeta, [])
   const { data: notes, loading, error, refetch } = useAsync(

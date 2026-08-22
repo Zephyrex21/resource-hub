@@ -56,3 +56,20 @@ look modeled on takeuforward.org.
 
 ### Next
 Ask-AI panel over site content; consider full useAsync → React Query migration.
+
+## 2026-08-22 — Redesign polish + full-length Home page
+
+- **Redesign consistency pass**
+  - PWA manifest `theme_color`/`background_color` and the favicon/app icons were still the old purple network-node mark — replaced with a flat orange "R" mark, regenerated all icon sizes from it
+  - `WhatsNew` rows still used the old glassy hover-lift — switched to the same flat background-tint hover as the Notes/Tips rows
+- **Notes/Tips filters are now URL-synced** (`useSearchParams`) — `/notes?subject=DSA` deep-links straight into a filtered, pre-scrolled list; this is what powers the new Home "Browse by subject" section
+- **Home page expanded** from hero+stats+explore into a full-length landing page:
+  - Browse by subject (pills linking into filtered Notes)
+  - Trending right now (real `viewCount` ranking via the existing `/stats/top` endpoint, not curated)
+  - Featured projects (existing `featured`/`order` fields)
+  - Latest additions (teaser feed, same merge-and-sort logic as What's New, links out to the full page)
+  - Why this hub (four non-vanity feature callouts — in-browser reading, progress tracking, related-content engine, offline/PWA)
+  - Closing CTA banner before the footer
+
+### Next
+Ask-AI panel over site content; consider full useAsync → React Query migration; possibly extend URL-synced filters to Projects.
