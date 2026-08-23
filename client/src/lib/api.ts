@@ -129,7 +129,7 @@ function jsonBody(data: unknown): RequestInit {
 export const getHealth = () => request<HealthResponse>('/health')
 export const getMeta = () => request<Meta>('/meta')
 
-export const getNotes = (params?: { subject?: string; tag?: string; search?: string }) =>
+export const getNotes = (params?: { subject?: string; difficulty?: string; tag?: string; search?: string }) =>
   request<Note[]>(`/notes${buildQuery(params)}`)
 export const getNoteBySlug = (slug: string) => request<Note>(`/notes/${slug}`)
 
@@ -143,6 +143,20 @@ export const getProjectBySlug = (slug: string) => request<Project>(`/projects/${
 
 export const getRelated = (type: RelatedContentType, slug: string, limit = 4) =>
   request<RelatedItem[]>(`/related/${type}/${slug}${buildQuery({ limit: String(limit) })}`)
+
+export interface AskSource {
+  type: 'note' | 'tip' | 'project'
+  title: string
+  slug: string
+}
+
+export interface AskResponse {
+  answer: string
+  sources: AskSource[]
+}
+
+export const askQuestion = (question: string) =>
+  request<AskResponse>('/ask', { method: 'POST', ...jsonBody({ question }) })
 
 export const search = (q: string) => request<SearchResults>(`/search${buildQuery({ q })}`)
 export const getStats = () => request<Stats>('/stats')

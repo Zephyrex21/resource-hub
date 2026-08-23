@@ -45,21 +45,23 @@ export default function NoteDetail() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-3">
-        <Tag variant="notes">{note.subject}</Tag>
+      <div className="flex flex-col gap-2.5">
+        <div className="flex items-center gap-2">
+          <DifficultyBadge difficulty={note.difficulty} />
+          <Tag variant="notes">{note.subject}</Tag>
+        </div>
         <h1 className="font-display text-3xl font-bold">{note.title}</h1>
         <p className="text-muted">{note.description}</p>
 
-        <div className="flex flex-wrap items-center gap-2">
-          {note.tags.map((tag) => (
-            <Tag key={tag} variant="neutral">
-              {tag}
-            </Tag>
-          ))}
-          <span className="ml-auto">
-            <DifficultyBadge difficulty={note.difficulty} />
-          </span>
-        </div>
+        {note.tags.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2">
+            {note.tags.map((tag) => (
+              <Tag key={tag} variant="neutral">
+                {tag}
+              </Tag>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="flex flex-wrap items-center gap-3">

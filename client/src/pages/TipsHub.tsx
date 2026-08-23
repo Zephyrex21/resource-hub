@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getTips, getMeta, type Tip } from '../lib/api'
 import { useAsync } from '../hooks/useAsync'
 import { useProgress } from '../context/ProgressContext'
 import { ProgressCheckbox } from '../components/ProgressCheckbox'
+import { SimpleProgressSummary } from '../components/SimpleProgressSummary'
 import { estimateReadingTime } from '../lib/readingTime'
 import { SearchInput } from '../components/ui/SearchInput'
 import { FilterChips } from '../components/ui/FilterChips'
@@ -29,6 +30,14 @@ function ChevronIcon({ open }: { open: boolean }) {
     >
       <path d="m9 18 6-6-6-6" />
     </motion.svg>
+  )
+}
+
+function ShuffleIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m18 4 3 3-3 3M18 20l3-3-3-3M2 7h3a5 5 0 0 1 4.5 2.79M2 17h3a5 5 0 0 0 4.5-2.79M21 7h-4.5a5 5 0 0 0-4.24 2.34M21 17h-4.5a5 5 0 0 1-4.24-2.34" />
+    </svg>
   )
 }
 
@@ -109,6 +118,7 @@ function CategoryGroup({ category, tips }: { category: string; tips: Tip[] }) {
 
 export default function TipsHub() {
   usePageTitle('Tips')
+  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const category = searchParams.get('category') ?? ''
   const [search, setSearch] = useState('')
@@ -122,7 +132,9 @@ export default function TipsHub() {
     () => getTips({ category: category || undefined, search: search || undefined }),
     [category, search],
   )
-  const { countCompleted } = useProgress()
+  // Unfiltered — same reasoning as NotesHub: the progress summary and
+  // Random Tip button always operate on the whole set, not the current filter.
+  const { data: allTips } = useAsync(getTips, [])
 
   const groups = useMemo(() => {
     if (!tips) return []
@@ -138,7 +150,12 @@ export default function TipsHub() {
     return order.map((c) => ({ category: c, tips: byCategory.get(c)! }))
   }, [tips])
 
-  const totalDone = tips ? countCompleted('tip', tips.map((t) => t.slug)) : 0
+  function goToRandomTip() {
+    const pool = allTips && allTips.length > 0 ? allTips : tips
+    if (!pool || pool.length === 0) return
+    const pick = pool[Math.floor(Math.random() * pool.length)]
+    navigate(`/tips/${pick.slug}`)
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -147,13 +164,17 @@ export default function TipsHub() {
           <h1 className="font-display text-3xl font-bold">Tips</h1>
           <p className="mt-1 text-sm text-muted">Quick tips & tricks, organized by category.</p>
         </div>
-        {tips && tips.length > 0 && (
-          <div className="flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-sm">
-            <span className="font-semibold text-easy">{totalDone}</span>
-            <span className="text-muted">/ {tips.length} done</span>
-          </div>
-        )}
+        <button
+          onClick={goToRandomTip}
+          disabled={!allTips || allTips.length === 0}
+          className="clay-btn flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-text disabled:opacity-50"
+        >
+          <ShuffleIcon />
+          Random Tip
+        </button>
       </div>
+
+      {allTips && allTips.length > 0 && <SimpleProgressSummary allTips={allTips} />}
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <FilterChips options={meta?.tipCategories ?? []} active={category} onChange={setCategory} />

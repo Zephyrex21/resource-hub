@@ -14,6 +14,11 @@ interface UIState {
 
   recentSearches: string[]
   addRecentSearch: (query: string) => void
+
+  askPanelOpen: boolean
+  openAskPanel: () => void
+  closeAskPanel: () => void
+  toggleAskPanel: () => void
 }
 
 const MAX_RECENT_SEARCHES = 5
@@ -31,4 +36,9 @@ export const useUIStore = create<UIState>((set, get) => ({
     const existing = get().recentSearches.filter((q) => q.toLowerCase() !== trimmed.toLowerCase())
     set({ recentSearches: [trimmed, ...existing].slice(0, MAX_RECENT_SEARCHES) })
   },
+
+  askPanelOpen: false,
+  openAskPanel: () => set({ askPanelOpen: true }),
+  closeAskPanel: () => set({ askPanelOpen: false }),
+  toggleAskPanel: () => set((s) => ({ askPanelOpen: !s.askPanelOpen })),
 }))

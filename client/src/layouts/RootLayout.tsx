@@ -4,6 +4,8 @@ import { AnimatePresence } from 'framer-motion'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import CommandPalette from '../components/CommandPalette'
+import { AskAIButton } from '../components/AskAIButton'
+import { AskAIPanel } from '../components/AskAIPanel'
 import { PageTransition } from '../components/PageTransition'
 import { useUIStore } from '../store/uiStore'
 
@@ -42,6 +44,8 @@ export default function RootLayout() {
       </main>
 
       <Footer />
+      <AskAIButton />
+      <AskAIPanel />
     </div>
   )
 }

@@ -64,7 +64,7 @@ export default function TipDetail() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2.5">
         <div className="flex items-center gap-2">
           <Tag variant="tips">{tip.category}</Tag>
           {readingTime && <span className="text-xs text-muted">· {readingTime} min read</span>}

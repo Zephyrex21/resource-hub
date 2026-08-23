@@ -448,6 +448,31 @@ This repo already includes 5 real notes in `server/import/files/` + a filled-in
 a RAG vs CAG vs MAG comparison, and a full React beginner-to-advanced set. Run the two
 commands above and they'll appear on `/notes` for real, PDF viewer and all.
 
+## 13. Set up Ask AI (optional)
+
+The floating "Ask AI" button lets visitors ask questions and get an answer grounded in
+your actual Notes/Tips/Projects — retrieval reuses the same text index that powers ⌘K
+search, generation goes through the Claude API. It's entirely optional: leave the env var
+below unset and the feature disables itself cleanly (a clear "not configured" message
+instead of a broken button).
+
+1. Get a key at [console.anthropic.com](https://console.anthropic.com).
+2. Add to `server/.env`:
+   ```
+   ANTHROPIC_API_KEY=sk-ant-...
+   ANTHROPIC_MODEL=claude-sonnet-5
+   ```
+   (`ANTHROPIC_MODEL` is optional — defaults to `claude-sonnet-5` if unset. Check
+   [docs.claude.com](https://docs.claude.com) for the current model lineup if you want a
+   different one.)
+3. Restart the server. That's it — no client-side env var needed.
+
+Worth knowing: Notes are file-based (PDF/DOCX), and only their title/description/tags/
+difficulty are indexed as text — not the file's actual body content. So Ask AI can point
+someone to the right note but can't answer questions about what's *inside* one. Tips have
+real markdown bodies, so those answers can go deeper. There's also a small per-IP rate
+limit (10 questions / 5 minutes) since this hits a paid API with no login wall in front of it.
+
 ## Applying this update to your live site
 
 Two commands to run from `server/` (against your real, deployed database —

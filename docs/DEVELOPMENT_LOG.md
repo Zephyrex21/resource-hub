@@ -73,3 +73,30 @@ Ask-AI panel over site content; consider full useAsync → React Query migration
 
 ### Next
 Ask-AI panel over site content; consider full useAsync → React Query migration; possibly extend URL-synced filters to Projects.
+
+## 2026-08-22 — takeuforward UI parity pass
+
+Pulled the actual DOM structure off takeuforward's live DSA sheet page (not
+just screenshots) to close the remaining gaps between their sheet UI and
+ours, rather than guessing at the pattern.
+
+- **Overall Progress dashboard** (`ProgressDashboard` on Notes, `SimpleProgressSummary` on Tips) — a ring/percentage + fraction sitting above the subject/category accordion list, with an Easy/Medium/Hard breakdown on Notes (Tips has no difficulty field, so it's just the ring). Deliberately computed from the *unfiltered* full list, not whatever subject/difficulty filter is currently narrowing the accordion below — matches takeuforward's sheet-level summary staying constant while you filter the list under it
+- **Difficulty filter** — new `DifficultySelect`, `?difficulty=` added as a real query param end-to-end. No server changes needed: `crudFactory`'s generic query passthrough already handled arbitrary Note fields
+- **Random Note / Random Tip button** — picks from the unfiltered set and navigates straight to the detail page (mirrors their "Random Problem" button)
+- **Detail page header tightened** — difficulty badge moved up next to the subject/category tag at the top of the block (title → description → tags below), instead of trailing after the tag row
+
+Explicitly scoped out: their premium tier, video lectures, and per-problem discussion/Q&A section — none of that content exists in this hub, so it was treated as UI-pattern-only parity rather than a literal feature clone.
+
+### Next
+Ask-AI panel over site content; consider full useAsync → React Query migration; possibly extend URL-synced filters to Projects.
+
+## 2026-08-23 — Ask AI + closing out the backlog
+
+- **Ask AI panel** — the feature that's been sitting in "Next" since the first pass. Floating "Ask AI" button opens a slide-in panel; session-only Q&A (no persistence — resets on reload, unlike Bookmarks/Progress which are worth keeping in localStorage).
+  - Backend: `POST /api/v1/ask` retrieves context via the same `$text` indexes that already power ⌘K search (no separate vector store), then asks Claude to answer grounded only in that context. Notes only expose title/description/tags/difficulty to the model (the PDF/DOCX body itself isn't indexed as text), so it can point to the right note but can't reason about what's inside one. Tips include real markdown content, so those answers can go deeper.
+  - Fails closed and explains itself: no `ANTHROPIC_API_KEY` set → clear "not configured" message instead of a broken feature. Added a small in-memory per-IP rate limiter (10 req / 5 min) since this hits a paid API with no auth in front of it; added `app.set('trust proxy', 1)` so `req.ip` resolves correctly behind Render's reverse proxy instead of rate-limiting the proxy's IP for every visitor at once.
+  - New env vars documented in `.env.example`: `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` (defaults to `claude-sonnet-5`).
+- **Projects now has a status filter** (Active/Completed/Archived), URL-synced the same way Notes/Tips already were — the one filter-parity gap left over from the redesign pass.
+
+### Next
+Nothing currently queued — Ask AI, difficulty/status filters, and the progress dashboard were the last open items from the redesign backlog. Worth revisiting later: full useAsync → React Query migration, and whether Ask AI's answer quality on Notes improves enough to justify extracting PDF/DOCX text into the index.

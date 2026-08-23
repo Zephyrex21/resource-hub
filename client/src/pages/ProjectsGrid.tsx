@@ -1,9 +1,10 @@
-import { useNavigate } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { getProjects } from '../lib/api'
+import { getProjects, getMeta } from '../lib/api'
 import { useAsync } from '../hooks/useAsync'
 import { GlassCard } from '../components/ui/Card'
 import { Tag } from '../components/ui/Tag'
+import { FilterChips } from '../components/ui/FilterChips'
 import { ErrorState, EmptyState } from '../components/ui/StateViews'
 import { SkeletonGrid } from '../components/ui/Skeleton'
 import { containerVariants, itemVariants } from '../components/motionVariants'
@@ -12,7 +13,18 @@ import { usePageTitle } from '../hooks/usePageTitle'
 export default function ProjectsGrid() {
   usePageTitle('Projects')
   const navigate = useNavigate()
-  const { data: projects, loading, error, refetch } = useAsync(() => getProjects(), [])
+  const [searchParams, setSearchParams] = useSearchParams()
+  const status = searchParams.get('status') ?? ''
+
+  function setStatus(next: string) {
+    setSearchParams(next ? { status: next } : {}, { replace: true })
+  }
+
+  const { data: meta } = useAsync(getMeta, [])
+  const { data: projects, loading, error, refetch } = useAsync(
+    () => getProjects({ status: status || undefined }),
+    [status],
+  )
 
   const sorted = projects ? [...projects].sort((a, b) => a.order - b.order) : null
 
@@ -23,10 +35,12 @@ export default function ProjectsGrid() {
         <p className="mt-1 text-sm text-muted">Real, shipped work — source and live demos.</p>
       </div>
 
+      <FilterChips options={meta?.projectStatuses ?? []} active={status} onChange={setStatus} />
+
       {loading && <SkeletonGrid />}
       {error && <ErrorState message={error} onRetry={refetch} />}
       {!loading && !error && sorted && sorted.length === 0 && (
-        <EmptyState message="No projects yet." />
+        <EmptyState message="No projects match that filter yet." />
       )}
 
       {!loading && !error && sorted && sorted.length > 0 && (

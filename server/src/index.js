@@ -13,10 +13,12 @@ import uploadRoutes from './routes/upload.routes.js'
 import searchRoutes from './routes/search.routes.js'
 import statsRoutes from './routes/stats.routes.js'
 import relatedRoutes from './routes/related.routes.js'
+import askRoutes from './routes/ask.routes.js'
 import { notFound, errorHandler } from './middleware/errorHandler.js'
 
 const app = express()
 const PORT = process.env.PORT || 5000
+app.set('trust proxy', 1)
 
 // Supports a comma-separated list so production + a local dev origin can both
 // work at once, e.g. CLIENT_ORIGIN=https://myapp.vercel.app,http://localhost:5173
@@ -52,6 +54,7 @@ app.use('/api/v1/upload', uploadRoutes)
 app.use('/api/v1/search', searchRoutes)
 app.use('/api/v1/stats', statsRoutes)
 app.use('/api/v1/related', relatedRoutes)
+app.use('/api/v1/ask', askRoutes)
 
 app.use(notFound)
 app.use(errorHandler)
