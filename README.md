@@ -1,5 +1,49 @@
 # Resource Hub
 
+## Recent updates (Phase 6/7 — takeuforward-style redesign + Ask AI)
+
+Everything below supersedes the design details described further down this README (those
+sections are historical build notes from earlier phases — left in place, but the actual
+current look/feel is described here).
+
+- **Full visual redesign**, modeled on takeuforward.org's UI patterns:
+  - Single bright orange brand accent (`#FF6B00` light / `#FF8A3D` dark) replacing the old
+    purple/gold/teal three-accent system; display font swapped Space Grotesk → Poppins
+  - Flat, bordered cards everywhere — the old glassmorphism (blur) and claymorphism
+    (soft-shadow) look is gone, along with the canvas particle background and the hero
+    illustration's floating/pulsing ambient animation (it's static now). Motion left is
+    functional only: accordion expand, hover, one-time entrance
+  - Notes and Tips hubs rebuilt from a 3-column card grid into **collapsible,
+    subject/category-grouped row lists** — closer to a problem-sheet than a card wall
+  - New green/amber/red **Easy/Medium/Hard difficulty badges** (reusing the existing Note
+    `difficulty` field)
+  - Favicon/app icons and the PWA manifest's theme colors updated to match (a flat orange
+    "R" mark, replacing the old purple network-node graphic)
+- **Real progress tracking** (`ProgressContext`, localStorage — same no-backend pattern as
+  Bookmarks): a per-row "mark as done" checkbox, a per-subject/category completion bar, and
+  an **Overall Progress dashboard** at the top of Notes/Tips (big %, fraction, and an
+  Easy/Medium/Hard breakdown on Notes) — pulled directly from takeuforward's actual sheet
+  page structure, not guessed at
+- **Difficulty filter** (Notes) and **status filter** (Projects), both URL-synced
+  (`?difficulty=`, `?status=`, `?subject=`, `?category=`) so filtered views are shareable/
+  bookmarkable links, not just local UI state. **Random Note / Random Tip** buttons too.
+- **Cross-type related-content engine** — a new `/api/v1/related/:type/:slug` endpoint scores
+  every Note/Tip/Project by tag/tech-stack overlap, so a Note's "You might also like" can
+  now surface a genuinely relevant Tip or Project, not just more Notes in the same subject
+  (the old behavior). Added to Tip and Project detail pages too, which had nothing before.
+- **Ask AI** — a floating button opens a slide-in panel for session-only Q&A grounded in
+  your actual Notes/Tips/Projects (retrieval via the existing `$text` search index,
+  generation via the Claude API). Optional — disables itself cleanly with no
+  `ANTHROPIC_API_KEY` set. See **[§13](#13-set-up-ask-ai-optional)** below for setup, and
+  the "Worth knowing" callout there for what it can and can't actually answer.
+- **Home page** expanded from hero+stats+explore into a full-length landing page: browse-
+  by-subject, trending (real `viewCount` ranking), featured projects, a latest-additions
+  teaser feed, a "why this hub" feature section, and a closing CTA — all built from data
+  the API already exposed, nothing fabricated.
+- **Foundation/tooling:** added Zustand (replaced prop-drilled command-palette state) and
+  React Query (used by the new related-content/Ask-AI-adjacent features going forward;
+  older pages still use the existing `useAsync` hook — not a full rewrite).
+
 ## Recent updates (post-Phase 5)
 
 - **Six new features (content/discovery + bigger-picture, not UI polish):**
@@ -69,8 +113,7 @@
     syncs with the server in the background).
   - **Share button** — copies the current page URL, on both Note and Tip detail pages.
 - **Finishing-touch polish:**
-  - Real favicon (matches the hero illustration's three-node motif) + Open Graph/Twitter
-    meta tags, so link previews actually look intentional when shared
+  - Real favicon + Open Graph/Twitter meta tags, so link previews actually look intentional when shared
   - Per-page browser tab titles (e.g. "DBMS Fundamentals · Resource Hub" instead of
     "Resource Hub" everywhere)
   - Skeleton loading cards on Notes/Tips/Projects instead of a generic spinner — previews
@@ -101,8 +144,9 @@
 
 ## Progress
 
-- ✅ **Phase 0 — Foundation:** themed React client (light/dark, glass/clay, canvas particles) +
-  Express/MongoDB backend with a health check.
+- ✅ **Phase 0 — Foundation:** themed React client (light/dark, glass/clay, canvas particles —
+  the visual specifics here were later superseded by the Phase 6 redesign; see the top of
+  this README) + Express/MongoDB backend with a health check.
 - ✅ **Phase 1 — Data + API:** Note, Tip, and Project models; full CRUD REST API; real seed data.
 - ✅ **Phase 2 — Public pages:** Notes hub + in-browser PDF viewer, Tips hub + rendered
   Markdown with syntax highlighting, Projects grid.
@@ -110,8 +154,14 @@
   and a full admin panel (add/edit/delete + real file upload) for Notes/Tips/Projects.
 - ✅ **Phase 4 — Polish:** page transitions, card stagger animations, mobile navbar fix,
   responsive PDF viewer, WCAG contrast fixes, keyboard focus indicators, code-splitting.
+  (Contrast/color specifics here predate the Phase 6 redesign's single-accent palette.)
 - ✅ **Phase 5 — Deploy:** production-ready CORS/cookie config, Vercel + Render setup,
   MongoDB Atlas network access — all on free tiers, no card required anywhere.
+- ✅ **Phase 6 — Redesign:** full takeuforward-style visual overhaul, real progress
+  tracking, difficulty/status filters, cross-type related-content engine, expanded Home
+  page. Details at the top of this README.
+- ✅ **Phase 7 — Ask AI:** grounded Q&A over the hub's own content, optional
+  (`ANTHROPIC_API_KEY`), with a per-IP rate limit. See [§13](#13-set-up-ask-ai-optional).
 
 ## What's in the project so far
 
@@ -179,9 +229,10 @@ npm run dev
 ```
 
 Open `http://localhost:5173`. You should see:
-- A glass navbar with a theme toggle (sun/moon icon, top of the page)
-- A canvas particle background (subtle moving dots/lines behind everything)
-- A clay-styled hero card
+- A flat, white/orange-accented navbar with a theme toggle (sun/moon icon, top of the page)
+- A hero section with an orange "Browse Notes" button and a static illustration (no
+  ambient/floating animation — motion here is limited to a one-time entrance and
+  scroll-driven parallax)
 - A status pill reading **"Backend connected · DB: connected"** — this confirms the full
   client → server → database chain is working
 
@@ -316,7 +367,9 @@ to it, and confirm **Esc** closes the palette.
 ## 10. Check the polish pass (Phase 4)
 
 A few specific things to verify, since these were real issues I found and fixed while
-building this phase — worth confirming they actually landed:
+building this phase — worth confirming they actually landed. (The color specifics in the
+first bullet predate the Phase 6 redesign's single-orange-accent palette — the underlying
+contrast fix is still in effect, just against different colors now.)
 
 - **Contrast:** the Tips (amber) and Projects (teal) tag colors are noticeably darker/more
   muted in light mode than earlier phases. That's intentional — the original bright versions
@@ -475,27 +528,20 @@ limit (10 questions / 5 minutes) since this hits a paid API with no login wall i
 
 ## Applying this update to your live site
 
-Two commands to run from `server/` (against your real, deployed database —
-same `.env` you're already using):
+Two commands to run from `server/` (against your real, deployed database — same `.env`
+you're already using), needed for the Projects/GitHub update and the bulk-import feature:
 
 ```bash
 npm run clean-samples   # removes the old sample notes/tips, leaves your real content alone
-npm run seed             # refreshes Projects with your real GitHub repos
+npm run seed             # refreshes Projects with your real GitHub repos / new `order` field
 ```
 
 Then redeploy the client as usual (`git push` — Vercel picks it up automatically).
 
-## Applying this update to your live site
-
-Same as before — Projects changed, so:
-
-```bash
-npm run clean-samples   # if you haven't already run this
-npm run seed             # refreshes Projects with the real GitHub data / new `order` field
-```
-
-No new env vars needed for any of the six new features — bookmarks are pure localStorage,
-and the PWA/view-tracking/analytics pieces all use your existing MongoDB connection.
+Ask AI doesn't need either of the commands above — just the `ANTHROPIC_API_KEY` env var
+from §13, and a server restart. No other feature in this README needs a new env var:
+bookmarks and progress tracking are pure localStorage, and PWA/view-tracking/analytics/
+the redesign all run on your existing MongoDB connection.
 
 ## Testing the six new features
 
@@ -541,8 +587,15 @@ phase — both Render's and Vercel's free tiers remain genuinely free with no ca
 2026. The only caveats: Render free services cold-start after inactivity, and Vercel Hobby is
 for non-commercial use.
 
+**Ask AI is the one exception** — it's optional (§13) and calls a paid API per question. The
+built-in rate limit (10 questions/5min per IP) caps worst-case cost, but it's not free like
+everything else. Skip setting `ANTHROPIC_API_KEY` if you'd rather keep the whole project on
+free tiers.
+
 ## What's next
 
-All five planned phases are done — you have a deployed, working, first-party resource hub.
-From here it's about content: adding real Notes/Tips (swap the seed data's placeholder URLs
-for real uploads via the admin panel) and keeping the Projects list current as you ship more.
+All seven phases above are done — a deployed, working, first-party resource hub with a
+takeuforward-style redesign and optional Ask AI. From here it's mostly about content
+(bulk-import real Notes via §12, keep Projects current as you ship more) plus whatever's
+listed under "Next" at the bottom of `docs/DEVELOPMENT_LOG.md` — that file tracks
+day-to-day changes in more granular detail than this README does.
