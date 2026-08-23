@@ -11,9 +11,14 @@ const links = [
 
 export default function Navbar() {
   const onSearchClick = useUIStore((s) => s.openCommandPalette)
+  const backendWaking = useUIStore((s) => s.backendWaking)
 
   return (
-    <header className="glass-card fixed left-1/2 top-3 z-10 flex w-[min(95%,920px)] -translate-x-1/2 items-center justify-between gap-1 rounded-2xl px-3 py-2.5 sm:top-4 sm:gap-3 sm:px-5 sm:py-3">
+    <header
+      className={`glass-card fixed left-1/2 z-10 flex w-[min(95%,920px)] -translate-x-1/2 items-center justify-between gap-1 rounded-2xl px-3 py-2.5 transition-[top] duration-300 sm:gap-3 sm:px-5 sm:py-3 ${
+        backendWaking ? 'top-[52px] sm:top-[60px]' : 'top-3 sm:top-4'
+      }`}
+    >
       <NavLink to="/" className="shrink-0 font-display text-base font-semibold text-text sm:text-lg">
         Resource Hub
       </NavLink>

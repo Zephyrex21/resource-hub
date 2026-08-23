@@ -19,6 +19,9 @@ interface UIState {
   openAskPanel: () => void
   closeAskPanel: () => void
   toggleAskPanel: () => void
+
+  backendWaking: boolean
+  setBackendWaking: (waking: boolean) => void
 }
 
 const MAX_RECENT_SEARCHES = 5
@@ -41,4 +44,10 @@ export const useUIStore = create<UIState>((set, get) => ({
   openAskPanel: () => set({ askPanelOpen: true }),
   closeAskPanel: () => set({ askPanelOpen: false }),
   toggleAskPanel: () => set((s) => ({ askPanelOpen: !s.askPanelOpen })),
+
+  // Set by useBackendWakeCheck (run once in RootLayout) — read here by both
+  // the banner itself and the Navbar/page layout, which need to shift down
+  // out of the banner's way while it's showing.
+  backendWaking: false,
+  setBackendWaking: (waking) => set({ backendWaking: waking }),
 }))

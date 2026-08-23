@@ -100,3 +100,11 @@ Ask-AI panel over site content; consider full useAsync → React Query migration
 
 ### Next
 Nothing currently queued — Ask AI, difficulty/status filters, and the progress dashboard were the last open items from the redesign backlog. Worth revisiting later: full useAsync → React Query migration, and whether Ask AI's answer quality on Notes improves enough to justify extracting PDF/DOCX text into the index.
+
+## 2026-08-23 — README cleanup + backend-waking banner
+
+- **README brought current** — added a top summary section covering everything from the redesign through Ask AI (previously only in this log), fixed a first-run checklist that still described the old glassmorphism/particle look, fixed a stale favicon description, and found/fixed a real pre-existing bug: two identically-titled "Applying this update to your live site" sections had drifted apart, and one claimed "no new env vars needed" — false since Ask AI. Merged into one accurate section.
+- **Backend-waking banner** — a top bar that shows if the Render free-tier backend is cold-starting. Only appears after a genuine ~1.5s delay (so a normal warm visit never sees it flash), retries the health check on failure for up to ~80s, and disappears the instant a check succeeds — never reappears afterward, since a later mid-session network hiccup isn't the same problem this explains. Navbar and page content shift down out of its way while it's showing (`backendWaking` lives in the shared Zustand store so both can react to it), with a smooth transition rather than a jump.
+
+### Next
+Nothing currently queued.

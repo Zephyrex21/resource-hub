@@ -43,6 +43,10 @@ current look/feel is described here).
 - **Foundation/tooling:** added Zustand (replaced prop-drilled command-palette state) and
   React Query (used by the new related-content/Ask-AI-adjacent features going forward;
   older pages still use the existing `useAsync` hook — not a full rewrite).
+- **Backend-waking banner** — a top bar that appears if the Render free-tier backend is
+  cold-starting (only shows after a genuine ~1.5s delay, so it doesn't flash on a normal
+  warm visit), and disappears automatically the instant a health check succeeds. Navbar and
+  page content shift down out of its way while it's showing.
 
 ## Recent updates (post-Phase 5)
 
@@ -584,8 +588,9 @@ the redesign all run on your existing MongoDB connection.
 Everything here is free: all npm packages are open-source, MongoDB Atlas's M0 tier is free
 forever, Supabase Storage's free tier needs no card, and — confirmed as of writing this
 phase — both Render's and Vercel's free tiers remain genuinely free with no card required in
-2026. The only caveats: Render free services cold-start after inactivity, and Vercel Hobby is
-for non-commercial use.
+2026. The only caveats: Render free services cold-start after inactivity (a top banner now
+tells visitors this is happening and disappears once the backend's awake — see "Recent
+updates" at the top of this README), and Vercel Hobby is for non-commercial use.
 
 **Ask AI is the one exception** — it's optional (§13) and calls a paid API per question. The
 built-in rate limit (10 questions/5min per IP) caps worst-case cost, but it's not free like
