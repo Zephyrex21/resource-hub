@@ -33,8 +33,8 @@ current look/feel is described here).
   (the old behavior). Added to Tip and Project detail pages too, which had nothing before.
 - **Ask AI** — a floating button opens a slide-in panel for session-only Q&A grounded in
   your actual Notes/Tips/Projects (retrieval via the existing `$text` search index,
-  generation via the Claude API). Optional — disables itself cleanly with no
-  `ANTHROPIC_API_KEY` set. See **[§13](#13-set-up-ask-ai-optional)** below for setup, and
+  generation via Groq's free API). Optional — disables itself cleanly with no
+  `GROQ_API_KEY` set. See **[§13](#13-set-up-ask-ai-optional)** below for setup, and
   the "Worth knowing" callout there for what it can and can't actually answer.
 - **Home page** expanded from hero+stats+explore into a full-length landing page: browse-
   by-subject, trending (real `viewCount` ranking), featured projects, a latest-additions
@@ -165,7 +165,9 @@ current look/feel is described here).
   tracking, difficulty/status filters, cross-type related-content engine, expanded Home
   page. Details at the top of this README.
 - ✅ **Phase 7 — Ask AI:** grounded Q&A over the hub's own content, optional
-  (`ANTHROPIC_API_KEY`), with a per-IP rate limit. See [§13](#13-set-up-ask-ai-optional).
+  (`GROQ_API_KEY`), free (Groq's free tier). See [§13](#13-set-up-ask-ai-optional).
+- ✅ **Phase 8 — Rate limiting:** three `express-rate-limit` layers (global, Ask AI,
+  login brute-force protection). See [Rate limiting](#rate-limiting).
 
 ## What's in the project so far
 
@@ -509,26 +511,48 @@ commands above and they'll appear on `/notes` for real, PDF viewer and all.
 
 The floating "Ask AI" button lets visitors ask questions and get an answer grounded in
 your actual Notes/Tips/Projects — retrieval reuses the same text index that powers ⌘K
-search, generation goes through the Claude API. It's entirely optional: leave the env var
-below unset and the feature disables itself cleanly (a clear "not configured" message
-instead of a broken button).
+search, generation goes through Groq's API (their free tier, no card required). It's
+entirely optional: leave the env var below unset and the feature disables itself cleanly
+(a clear "not configured" message instead of a broken button).
 
-1. Get a key at [console.anthropic.com](https://console.anthropic.com).
+1. Get a key at [console.groq.com](https://console.groq.com) — sign in, "API Keys" in the
+   sidebar, create one. It starts with `gsk_`.
 2. Add to `server/.env`:
    ```
-   ANTHROPIC_API_KEY=sk-ant-...
-   ANTHROPIC_MODEL=claude-sonnet-5
+   GROQ_API_KEY=gsk_...
+   GROQ_MODEL=llama-3.3-70b-versatile
    ```
-   (`ANTHROPIC_MODEL` is optional — defaults to `claude-sonnet-5` if unset. Check
-   [docs.claude.com](https://docs.claude.com) for the current model lineup if you want a
-   different one.)
+   (`GROQ_MODEL` is optional — defaults to `llama-3.3-70b-versatile` if unset. Check
+   [console.groq.com](https://console.groq.com) for the current model lineup if you want a
+   different one — Groq's free-tier model set changes over time.)
 3. Restart the server. That's it — no client-side env var needed.
 
 Worth knowing: Notes are file-based (PDF/DOCX), and only their title/description/tags/
 difficulty are indexed as text — not the file's actual body content. So Ask AI can point
 someone to the right note but can't answer questions about what's *inside* one. Tips have
-real markdown bodies, so those answers can go deeper. There's also a small per-IP rate
-limit (10 questions / 5 minutes) since this hits a paid API with no login wall in front of it.
+real markdown bodies, so those answers can go deeper. It's also rate-limited — see
+"Rate limiting" below for the full picture across the whole API, not just this endpoint.
+
+## Rate limiting
+
+Three separate limiters, all via `express-rate-limit`, all per-IP (needs `trust proxy`
+set, which `server/src/index.js` already does):
+
+- **Global** — 300 requests / 15 min across all of `/api/v1/*` (except `/health`, which
+  the cold-start banner polls repeatedly and needs to stay unthrottled). Baseline abuse/DoS
+  protection; generous enough that normal browsing never comes close to it.
+- **Ask AI** — 10 questions / 5 min, on top of the global limit. Groq's free tier removes
+  the "someone runs up your bill" risk, but an unthrottled public endpoint that triggers an
+  LLM call per request is still worth capping.
+- **Login** — 5 attempts / 15 min on `POST /api/v1/auth/login`. There was no brute-force
+  protection on this at all before — it's the one endpoint guarding admin write access to
+  the whole site.
+
+All three return `{ "error": "..." }` with a `429` status, matching the rest of the API's
+error shape, plus standard `RateLimit-*` response headers. They're in-memory (reset on
+server restart, don't share state across multiple instances) — fine for a single-instance
+Render deploy; swap in a Redis-backed store from `express-rate-limit`'s docs if this ever
+needs to scale horizontally.
 
 ## Applying this update to your live site
 
@@ -542,7 +566,7 @@ npm run seed             # refreshes Projects with your real GitHub repos / new 
 
 Then redeploy the client as usual (`git push` — Vercel picks it up automatically).
 
-Ask AI doesn't need either of the commands above — just the `ANTHROPIC_API_KEY` env var
+Ask AI doesn't need either of the commands above — just the `GROQ_API_KEY` env var
 from §13, and a server restart. No other feature in this README needs a new env var:
 bookmarks and progress tracking are pure localStorage, and PWA/view-tracking/analytics/
 the redesign all run on your existing MongoDB connection.
@@ -586,16 +610,15 @@ the redesign all run on your existing MongoDB connection.
 ## Cost check
 
 Everything here is free: all npm packages are open-source, MongoDB Atlas's M0 tier is free
-forever, Supabase Storage's free tier needs no card, and — confirmed as of writing this
-phase — both Render's and Vercel's free tiers remain genuinely free with no card required in
-2026. The only caveats: Render free services cold-start after inactivity (a top banner now
-tells visitors this is happening and disappears once the backend's awake — see "Recent
-updates" at the top of this README), and Vercel Hobby is for non-commercial use.
-
-**Ask AI is the one exception** — it's optional (§13) and calls a paid API per question. The
-built-in rate limit (10 questions/5min per IP) caps worst-case cost, but it's not free like
-everything else. Skip setting `ANTHROPIC_API_KEY` if you'd rather keep the whole project on
-free tiers.
+forever, Supabase Storage's free tier needs no card, Groq's API has a genuinely free tier
+(no card required), and — confirmed as of writing this phase — both Render's and Vercel's
+free tiers remain genuinely free with no card required in 2026. The only caveats: Render
+free services cold-start after inactivity (a top banner now tells visitors this is
+happening and disappears once the backend's awake — see "Recent updates" at the top of this
+README), Vercel Hobby is for non-commercial use, and Groq's free tier has its own rate
+limits on their end (separate from and stricter than this project's own — see
+[Rate limiting](#rate-limiting)) that can vary by model and change over time; check
+[console.groq.com](https://console.groq.com) if Ask AI starts erroring under real traffic.
 
 ## What's next
 

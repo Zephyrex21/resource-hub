@@ -14,6 +14,7 @@ import searchRoutes from './routes/search.routes.js'
 import statsRoutes from './routes/stats.routes.js'
 import relatedRoutes from './routes/related.routes.js'
 import askRoutes from './routes/ask.routes.js'
+import { apiLimiter } from './middleware/rateLimiters.js'
 import { notFound, errorHandler } from './middleware/errorHandler.js'
 
 const app = express()
@@ -44,7 +45,17 @@ app.use(
 app.use(express.json())
 app.use(cookieParser())
 
+// Health stays outside the rate limiter — the client's cold-start "waking
+// up" banner polls this repeatedly while the backend spins up, and it's
+// cheap enough that it doesn't need protecting the way content/write
+// endpoints do.
 app.use('/api/v1/health', healthRoutes)
+
+// Baseline abuse/DoS protection for everything else. Route-specific
+// limiters (askLimiter, authLimiter) stack on top of this for the couple
+// of endpoints that need a tighter cap.
+app.use('/api/v1', apiLimiter)
+
 app.use('/api/v1/notes', notesRoutes)
 app.use('/api/v1/tips', tipsRoutes)
 app.use('/api/v1/projects', projectsRoutes)

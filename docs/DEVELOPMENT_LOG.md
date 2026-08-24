@@ -108,3 +108,16 @@ Nothing currently queued — Ask AI, difficulty/status filters, and the progress
 
 ### Next
 Nothing currently queued.
+
+## 2026-08-23 — Ask AI provider swap (Anthropic → Groq) + rate-limiting hardening
+
+- **Ask AI now runs on Groq** instead of the Claude API — same retrieval/grounding logic (unchanged), different generation call: Groq's endpoint is OpenAI-compatible (`/openai/v1/chat/completions`, `Authorization: Bearer`, `choices[0].message.content`) rather than Anthropic's Messages API shape, so `askController.js`'s API call was rewritten, not just re-pointed. Env vars renamed `ANTHROPIC_API_KEY`/`ANTHROPIC_MODEL` → `GROQ_API_KEY`/`GROQ_MODEL` (default `llama-3.3-70b-versatile`) across `.env.example`, the controller, and the README. The practical upshot: Groq has a genuinely free tier, so Ask AI is no longer the one paid-API exception in the Cost check section — that section got rewritten accordingly, and now flags Groq's *own* rate limits (separate from and stricter than this project's) as the thing to watch instead.
+- **Rate limiting overhauled** — replaced the original hand-rolled in-memory Map-based limiter (which only covered `/ask`) with three `express-rate-limit` layers in a new `middleware/rateLimiters.js`:
+  - `apiLimiter` — 300 req/15min across all of `/api/v1/*` except `/health` (which the wake-up banner polls repeatedly and needs to stay unthrottled)
+  - `askLimiter` — 10 req/5min on top of the global limit, same cap as before but via the proper library instead of a first-pass implementation
+  - `authLimiter` — 5 attempts/15min on `POST /api/v1/auth/login`, which had **zero** brute-force protection before this — genuinely new coverage, not a like-for-like swap
+  - All three return the app's existing `{ error: "..." }` shape via a custom `handler`, and rely on the `trust proxy` setting (already added for the wake-up banner work) to read real client IPs behind Render's proxy.
+- README: new "Rate limiting" section documenting all three layers, §13 rewritten for Groq setup, Phase 7/8 split out in the Progress list (Ask AI vs. rate limiting as separate, individually-checkmarked phases).
+
+### Next
+Nothing currently queued.
