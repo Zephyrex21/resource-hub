@@ -121,3 +121,21 @@ Nothing currently queued.
 
 ### Next
 Nothing currently queued.
+
+## 2026-08-24 — Testing, CI, and security hardening (Tier 1, minus Docker)
+
+- **Split `index.js` → `app.js` + `index.js`** — the Express app config (middleware, routes) now lives in `app.js`, importable on its own; `index.js` is just `import app` → `connectDB()` → `app.listen()`. Pure testability refactor, zero behavior change — needed so tests could hit the app with `supertest` without also triggering a real MongoDB connection attempt.
+- **84 tests added** (64 server / Vitest + Supertest, 20 client / Vitest + React Testing Library), all self-contained — no real database, no real Groq key, no secrets needed to run any of them:
+  - Server: pure-function unit tests for the related-content scoring, Ask AI context-building, and every zod schema; a full mocked-model unit test suite for `crudFactory` (the shared controller backing Notes/Tips/Projects); route-level integration tests via supertest for login (success/failure/validation), the login rate limiter (proves the 6th rapid attempt actually gets blocked), Ask AI's validation/not-configured paths, and health.
+  - Client: unit tests for `readingTime` and `buildQuery`; component tests for `DifficultyBadge`; a real localStorage integration test for `ProgressCheckbox` + `ProgressContext` (not mocked — actually writes to and reads from `window.localStorage`).
+  - **Two real bugs caught in the process**, not just "tests that pass": (1) `tipUpdateSchema` was rejecting every partial update that didn't explicitly touch `contentMarkdown`/`fileUrl`, because those fields' `.default('')` was silently filling them in even when the caller never sent them — fixed by dropping the zod-level default and letting Mongoose's own model defaults handle the create-time case instead. (2) The client test setup didn't clean up the DOM between tests (this project runs Vitest with `globals: false`, so React Testing Library's usual auto-cleanup-via-global-afterEach never registered) — fixed with an explicit `afterEach(cleanup)` in the setup file.
+  - **Deliberately not covered**: the CRUD list/get endpoints against a real database, and Ask AI's full success path (real Groq call + real `$text` search) — would need a live test DB or `mongodb-memory-server` (skipped: needs to download a MongoDB binary, not guaranteed to work in every sandboxed/CI environment).
+- **CI** — new `.github/workflows/ci.yml`: client job (typecheck + test + build), server job (test), both on push/PR to `main`, both via `npm ci` against the committed lockfiles, neither needing any repository secrets.
+- **zod request validation** on every write endpoint — Notes/Tips/Projects create+update, login, Ask AI. New `middleware/validate.js` (generic, schema-agnostic) + `schemas/` (one file per resource, mirroring the existing `models/` convention). Malformed requests now get a specific `400` before ever reaching Mongoose, instead of a generic `ValidationError` — or, worse, a subtly-wrong document actually saving.
+- **`helmet`** added to `app.js` for standard security headers — safe with zero config tuning since this is a pure JSON API with no HTML/inline scripts of its own.
+- README: new "Testing, CI & Security" section, Phase 9 added to Progress, a CI badge (placeholder `<owner>/<repo>` — needs the real GitHub path swapped in once pushed).
+
+Explicitly out of scope for this pass (per instruction): Docker/docker-compose.
+
+### Next
+Docker + docker-compose (deferred, not declined). Beyond that: DB-backed integration tests (`mongodb-memory-server` or a CI-only test database), Ask AI's full success-path test coverage, and the longer-standing items — full useAsync → React Query migration, PDF/DOCX text extraction for deeper Ask AI answers on Notes.

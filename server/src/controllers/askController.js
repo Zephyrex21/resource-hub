@@ -2,7 +2,6 @@ import Note from '../models/Note.js'
 import Tip from '../models/Tip.js'
 import Project from '../models/Project.js'
 
-const MAX_QUESTION_LENGTH = 500
 const MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile'
 
 // Reuses the same $text indexes that power the ⌘K command palette
@@ -31,7 +30,8 @@ async function gatherContext(question) {
 // them. It can point someone to the right note but can't reason about a
 // PDF's contents. Tips have real markdown bodies, so those get truncated
 // content included too.
-function buildContextBlock({ notes, tips, projects }) {
+// Exported for unit testing — pure function, no DB/network involved.
+export function buildContextBlock({ notes, tips, projects }) {
   const blocks = [
     ...notes.map(
       (n) =>
@@ -48,7 +48,8 @@ function buildContextBlock({ notes, tips, projects }) {
   return blocks.join('\n\n---\n\n')
 }
 
-function collectSources({ notes, tips, projects }) {
+// Exported for unit testing — pure function, no DB/network involved.
+export function collectSources({ notes, tips, projects }) {
   return [
     ...notes.map((n) => ({ type: 'note', title: n.title, slug: n.slug })),
     ...tips.map((t) => ({ type: 'tip', title: t.title, slug: t.slug })),
@@ -58,11 +59,10 @@ function collectSources({ notes, tips, projects }) {
 
 export async function askQuestion(req, res, next) {
   try {
-    const question = (req.body?.question ?? '').trim()
-    if (!question) return res.status(400).json({ error: 'Question is required' })
-    if (question.length > MAX_QUESTION_LENGTH) {
-      return res.status(400).json({ error: `Keep questions under ${MAX_QUESTION_LENGTH} characters` })
-    }
+    // Shape/length validation (non-empty, ≤500 chars) already happened in
+    // the askSchema zod middleware — req.body.question is guaranteed to be
+    // a trimmed, valid string by the time it gets here.
+    const { question } = req.body
 
     if (!process.env.GROQ_API_KEY) {
       return res.status(503).json({

@@ -3,6 +3,8 @@ import bcrypt from 'bcryptjs'
 import { signToken } from '../utils/jwt.js'
 import { requireAdmin } from '../middleware/requireAdmin.js'
 import { authLimiter } from '../middleware/rateLimiters.js'
+import { validate } from '../middleware/validate.js'
+import { loginSchema } from '../schemas/authSchema.js'
 
 const router = Router()
 
@@ -20,7 +22,7 @@ const COOKIE_OPTS = {
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
 }
 
-router.post('/login', authLimiter, async (req, res, next) => {
+router.post('/login', authLimiter, validate(loginSchema), async (req, res, next) => {
   try {
     const { email, password } = req.body ?? {}
     const adminEmail = process.env.ADMIN_EMAIL

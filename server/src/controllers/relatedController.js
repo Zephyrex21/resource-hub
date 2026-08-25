@@ -16,7 +16,8 @@ const PROJECTIONS = {
   project: 'title slug description techStack status featured',
 }
 
-function scoreOverlap(sourceTags, sourceGroup, candidateTags, candidateGroup) {
+// Exported for unit testing — pure function, no DB involved.
+export function scoreOverlap(sourceTags, sourceGroup, candidateTags, candidateGroup) {
   const sourceSet = new Set((sourceTags || []).map((t) => t.toLowerCase()))
   const overlap = (candidateTags || []).filter((t) => sourceSet.has(t.toLowerCase())).length
   const groupBonus = sourceGroup && candidateGroup && sourceGroup === candidateGroup ? 1 : 0

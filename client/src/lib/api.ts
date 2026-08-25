@@ -102,7 +102,7 @@ export interface TopContent {
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api/v1'
 
-function buildQuery(params?: Record<string, string | undefined>): string {
+export function buildQuery(params?: Record<string, string | undefined>): string {
   if (!params) return ''
   const entries = Object.entries(params).filter(
     (entry): entry is [string, string] => entry[1] !== undefined && entry[1] !== '',

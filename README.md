@@ -1,5 +1,8 @@
 # Resource Hub
 
+[![CI](https://github.com/<owner>/<repo>/actions/workflows/ci.yml/badge.svg)](https://github.com/<owner>/<repo>/actions/workflows/ci.yml)
+_(Swap `<owner>/<repo>` above for your actual GitHub path once this is pushed — the badge will start resolving after the first CI run.)_
+
 ## Recent updates (Phase 6/7 — takeuforward-style redesign + Ask AI)
 
 Everything below supersedes the design details described further down this README (those
@@ -47,6 +50,13 @@ current look/feel is described here).
   cold-starting (only shows after a genuine ~1.5s delay, so it doesn't flash on a normal
   warm visit), and disappears automatically the instant a health check succeeds. Navbar and
   page content shift down out of its way while it's showing.
+- **Testing, CI, and security hardening** — 64 server tests + 20 client tests (Vitest,
+  Supertest, React Testing Library), all self-contained (no real database or API keys
+  needed to run them — see the "Testing" section below), a GitHub Actions CI workflow, zod
+  request validation on every write endpoint, `helmet` security headers, and a real Express
+  app/bootstrap split (`app.js` vs. `index.js`) so the app can actually be tested with
+  supertest in the first place. Details at [Testing, CI & Security](#testing-ci--security)
+  below.
 
 ## Recent updates (post-Phase 5)
 
@@ -168,6 +178,9 @@ current look/feel is described here).
   (`GROQ_API_KEY`), free (Groq's free tier). See [§13](#13-set-up-ask-ai-optional).
 - ✅ **Phase 8 — Rate limiting:** three `express-rate-limit` layers (global, Ask AI,
   login brute-force protection). See [Rate limiting](#rate-limiting).
+- ✅ **Phase 9 — Testing, CI, security:** 84 tests total, GitHub Actions CI, zod
+  validation on every write endpoint, `helmet` headers. See
+  [Testing, CI & Security](#testing-ci--security).
 
 ## What's in the project so far
 
@@ -532,6 +545,55 @@ difficulty are indexed as text — not the file's actual body content. So Ask AI
 someone to the right note but can't answer questions about what's *inside* one. Tips have
 real markdown bodies, so those answers can go deeper. It's also rate-limited — see
 "Rate limiting" below for the full picture across the whole API, not just this endpoint.
+
+## Testing, CI & Security
+
+**Tests** — 64 server tests (Vitest + Supertest) and 20 client tests (Vitest + React
+Testing Library), all self-contained: nothing requires a real MongoDB connection, a real
+Groq key, or any secret at all. Run them:
+
+```bash
+cd server && npm test
+cd client && npm test
+```
+
+How they avoid needing a real database:
+- Pure business logic (the related-content scoring, the Ask AI context-building, the zod
+  schemas, the shared CRUD controller) is tested directly as plain functions — the CRUD
+  controller tests use a **mocked** Mongoose model (`vi.fn()`), not a real one.
+- Route-level tests (`auth`, `ask`, `health`) hit the real Express app via `supertest`, but
+  only cover endpoints/paths that don't require touching the database — login checks
+  `ADMIN_EMAIL`/`ADMIN_PASSWORD_HASH` env vars directly (no DB involved at all), and the Ask
+  AI tests only cover the validation/not-configured paths, which return before any DB or
+  Groq call happens.
+- **Not covered**: the actual Notes/Tips/Projects list/get endpoints against a real
+  database, and Ask AI's full success path (real Groq call + real Mongo `$text` search).
+  Testing those properly would need either a live test database or something like
+  `mongodb-memory-server` — skipped here since it needs to download a MongoDB binary, which
+  isn't guaranteed to work in every CI/sandboxed environment. Worth adding later if this
+  grows past a personal-project scope.
+
+**Why `app.js` exists separately from `index.js`**: `index.js` used to both configure the
+Express app *and* connect to MongoDB *and* start listening, all in one file — which made it
+impossible to import "just the app" for testing without also triggering a real DB
+connection attempt. `app.js` now holds only the Express configuration (middleware, routes);
+`index.js` is just the three-line bootstrap (`import app` → `connectDB()` → `app.listen()`).
+Behavior in production is identical — this is a pure testability refactor.
+
+**CI** — `.github/workflows/ci.yml` runs on every push/PR to `main`: the client job
+type-checks, tests, and builds; the server job tests. Both install via `npm ci` (uses the
+committed lockfiles) and need zero repository secrets, since the test suites don't touch
+anything real.
+
+**Security hardening**:
+- **zod request validation** on every write endpoint (`POST`/`PUT` for Notes, Tips,
+  Projects; login; Ask AI) — malformed requests get a specific `400` before ever reaching
+  Mongoose or business logic, instead of a generic Mongoose `ValidationError` or, worse, a
+  subtly-wrong document actually getting saved.
+- **`helmet`** sets standard security headers (`X-Content-Type-Options`,
+  `X-Frame-Options`, a conservative default CSP, etc.). Safe to use with zero tuning here
+  since this is a pure JSON API with no HTML/inline scripts of its own.
+- See [Rate limiting](#rate-limiting) directly below for the third piece.
 
 ## Rate limiting
 
