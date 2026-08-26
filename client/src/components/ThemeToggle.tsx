@@ -40,7 +40,7 @@ export default function ThemeToggle() {
       ref={buttonRef}
       onClick={handleClick}
       aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
-      className="clay-btn flex h-9 w-9 items-center justify-center rounded-full text-text transition-transform hover:scale-105 active:scale-95"
+      className="nav-glass-btn nav-text flex h-9 w-9 items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95"
     >
       {isDark ? (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

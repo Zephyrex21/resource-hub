@@ -11,6 +11,7 @@ import { useAsync } from '../hooks/useAsync'
 import { useCountUp } from '../hooks/useCountUp'
 import { containerVariants, itemVariants } from '../components/motionVariants'
 import { usePageTitle } from '../hooks/usePageTitle'
+import { showcaseAccentText, showcaseAccentBg } from '../lib/showcaseAccents'
 
 const sections = [
   {
@@ -143,7 +144,9 @@ export default function Home() {
     .slice(0, 3)
 
   return (
-    <div className="flex flex-col gap-20 sm:gap-24">
+    <div className="showcase flex flex-col gap-20 sm:gap-24">
+      <div className="showcase-bg" aria-hidden="true" />
+
       {/* Hero */}
       <motion.section ref={heroRef} className="grid items-center gap-10 pt-6 lg:grid-cols-2 lg:gap-6">
         <motion.div style={{ y: textY }} className="flex flex-col items-start gap-6 text-left">
@@ -151,7 +154,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="glass-card rounded-full px-4 py-1.5 text-xs font-medium text-muted"
+            className="showcase-pill rounded-full px-4 py-1.5 text-xs font-medium"
           >
             Notes · Tips &amp; Tricks · Projects — all in one place
           </motion.span>
@@ -159,13 +162,15 @@ export default function Home() {
           <TypewriterHeading
             lines={headingLines}
             className="font-display text-4xl font-bold leading-[1.1] tracking-tight sm:text-5xl"
+            accentClassName="showcase-gradient-text"
+            accentAsBlock
           />
 
           <motion.p
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: 1.5 }}
-            className="max-w-md text-muted"
+            className="showcase-muted max-w-md"
           >
             A personal resource hub — study notes I wrote, tricks I figured out, and projects
             I've actually shipped. Read in-browser, not just linked out.
@@ -180,13 +185,13 @@ export default function Home() {
             <motion.div whileHover={{ y: -3, scale: 1.03 }} whileTap={{ scale: 0.97 }}>
               <Link
                 to="/notes"
-                className="block rounded-full bg-accent px-6 py-3 text-sm font-medium text-white"
+                className="showcase-cta block rounded-full px-6 py-3 text-sm font-medium"
               >
                 Browse Notes
               </Link>
             </motion.div>
             <motion.div whileHover={{ y: -3, scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-              <Link to="/projects" className="clay-btn block rounded-full px-6 py-3 text-sm font-medium text-text">
+              <Link to="/projects" className="showcase-cta-outline block rounded-full px-6 py-3 text-sm font-medium">
                 View Projects
               </Link>
             </motion.div>
@@ -233,17 +238,23 @@ export default function Home() {
         </div>
 
         <div className="grid gap-5 sm:grid-cols-3">
-          {sections.map((s) => (
-            <motion.div key={s.to} variants={itemVariants} whileHover={{ y: -4 }}>
-              <Link to={s.to}>
-                <GlassCard className="h-full px-6 py-8 text-left">
-                  <span className={`inline-block h-2.5 w-2.5 rounded-full ${s.dot}`} />
-                  <h3 className={`mt-3 font-display text-xl font-semibold ${s.accent}`}>{s.title}</h3>
-                  <p className="mt-2 text-sm text-muted">{s.description}</p>
-                </GlassCard>
-              </Link>
-            </motion.div>
-          ))}
+          {sections.map((s, i) => {
+            const accentBg = showcaseAccentBg[i % 3]
+            const accentText = showcaseAccentText[i % 3]
+            return (
+              <motion.div key={s.to} variants={itemVariants} whileHover={{ y: -4 }}>
+                <Link to={s.to}>
+                  <GlassCard variant="showcase" className="h-full px-6 py-8 text-left">
+                    <span className={`inline-flex h-9 w-9 items-center justify-center rounded-lg ${accentBg}`}>
+                      <span className={`h-2.5 w-2.5 rounded-full ${accentText}`} style={{ background: 'currentColor' }} />
+                    </span>
+                    <h3 className={`mt-3 font-display text-xl font-semibold ${accentText}`}>{s.title}</h3>
+                    <p className="showcase-muted mt-2 text-sm">{s.description}</p>
+                  </GlassCard>
+                </Link>
+              </motion.div>
+            )
+          })}
         </div>
       </motion.section>
 
@@ -335,23 +346,27 @@ export default function Home() {
           </div>
 
           <div className="grid gap-5 sm:grid-cols-3">
-            {featuredProjects.map((project) => (
-              <motion.div key={project._id} variants={itemVariants}>
-                <Link to={`/projects/${project.slug}`}>
-                  <GlassCard className="flex h-full flex-col gap-2 px-5 py-6 transition-shadow hover:shadow-[var(--card-shadow-hover)]">
-                    <h3 className="font-display text-base font-semibold leading-snug">{project.title}</h3>
-                    <p className="line-clamp-2 text-sm text-muted">{project.description}</p>
-                    <div className="mt-auto flex flex-wrap gap-1.5 pt-2">
-                      {project.techStack.slice(0, 3).map((tech) => (
-                        <span key={tech} className="rounded-full bg-border px-2 py-0.5 text-[11px] text-muted">
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-                  </GlassCard>
-                </Link>
-              </motion.div>
-            ))}
+            {featuredProjects.map((project, i) => {
+              const accentText = showcaseAccentText[i % 3]
+              return (
+                <motion.div key={project._id} variants={itemVariants} whileHover={{ y: -4, rotate: i % 2 === 0 ? -1 : 1 }}>
+                  <Link to={`/projects/${project.slug}`}>
+                    <GlassCard variant="showcase" className="flex h-full flex-col gap-2 px-5 py-6">
+                      <span className={`h-1.5 w-8 rounded-full ${accentText}`} style={{ background: 'currentColor' }} />
+                      <h3 className="mt-1 font-display text-base font-semibold leading-snug">{project.title}</h3>
+                      <p className="showcase-muted line-clamp-2 text-sm">{project.description}</p>
+                      <div className="mt-auto flex flex-wrap gap-1.5 pt-2">
+                        {project.techStack.slice(0, 3).map((tech) => (
+                          <span key={tech} className="showcase-pill rounded-full px-2 py-0.5 text-[11px]">
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+                    </GlassCard>
+                  </Link>
+                </motion.div>
+              )
+            })}
           </div>
         </motion.section>
       )}
@@ -409,17 +424,21 @@ export default function Home() {
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {features.map((f) => (
-            <motion.div key={f.title} variants={itemVariants}>
-              <GlassCard className="flex h-full flex-col gap-3 px-5 py-6">
-                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent/10 text-accent">
-                  <FeatureIcon>{f.icon}</FeatureIcon>
-                </span>
-                <h3 className="font-display text-sm font-semibold">{f.title}</h3>
-                <p className="text-xs text-muted">{f.description}</p>
-              </GlassCard>
-            </motion.div>
-          ))}
+          {features.map((f, i) => {
+            const accentBg = showcaseAccentBg[i % 3]
+            const accentText = showcaseAccentText[i % 3]
+            return (
+              <motion.div key={f.title} variants={itemVariants}>
+                <GlassCard variant="showcase" className="flex h-full flex-col gap-3 px-5 py-6">
+                  <span className={`flex h-9 w-9 items-center justify-center rounded-lg ${accentBg} ${accentText}`}>
+                    <FeatureIcon>{f.icon}</FeatureIcon>
+                  </span>
+                  <h3 className="font-display text-sm font-semibold">{f.title}</h3>
+                  <p className="showcase-muted text-xs">{f.description}</p>
+                </GlassCard>
+              </motion.div>
+            )
+          })}
         </div>
       </motion.section>
 
@@ -430,15 +449,15 @@ export default function Home() {
         viewport={{ once: true, amount: 0.4 }}
         variants={itemVariants}
       >
-        <ClayCard className="flex flex-col items-center gap-4 px-8 py-12 text-center sm:py-14">
+        <GlassCard variant="showcase" className="flex flex-col items-center gap-4 px-8 py-12 text-center sm:py-14">
           <h2 className="font-display text-2xl font-bold sm:text-3xl">Ready to dive in?</h2>
-          <p className="max-w-md text-sm text-muted">
+          <p className="showcase-muted max-w-md text-sm">
             Pick up where a subject left off, or browse everything from scratch.
           </p>
-          <Link to="/notes" className="rounded-full bg-accent px-6 py-3 text-sm font-medium text-white">
+          <Link to="/notes" className="showcase-cta rounded-full px-6 py-3 text-sm font-medium">
             Browse Notes
           </Link>
-        </ClayCard>
+        </GlassCard>
       </motion.section>
     </div>
   )

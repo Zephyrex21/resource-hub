@@ -25,6 +25,40 @@
 
   --card-shadow: 0 1px 2px rgba(16, 18, 22, 0.04);
   --card-shadow-hover: 0 4px 14px rgba(16, 18, 22, 0.08);
+
+  /* Showcase tokens — a second, adaptive palette scoped to the
+     DesignCode-inspired "marketing zone" (Home hero + ProjectsGrid).
+     Deliberately toned down in light mode: bright saturated gradients on
+     white read cheap fast, so alpha/intensity is lower here than in .dark. */
+  --showcase-bg: 248 247 252;
+  --showcase-surface: 255 255 255;
+  --showcase-surface-alpha: 0.55;
+  --showcase-border: 15 15 30;
+  --showcase-border-alpha: 0.08;
+  --showcase-glow-1: 236 72 219;
+  --showcase-glow-2: 234 88 12;
+  --showcase-glow-3: 79 70 229;
+  --showcase-glow-alpha: 0.16;
+  --showcase-cta-bg: 22 24 29;
+  --showcase-cta-text: 255 255 255;
+  --showcase-text: 22 24 29;
+  --showcase-text-muted: 90 93 110;
+
+  /* Navbar glass — adaptive to light/dark like the rest of the app.
+     (Earlier version hardcoded this to always-dark on the assumption the
+     nav needed one universal look spanning a dark showcase zone and a
+     light flat zone — but light/dark here is a single global toggle, not
+     a per-section thing, so the nav and the page beneath it are always in
+     the same mode. No reason for it to diverge from the theme.) */
+  --nav-bg: 255 255 255;
+  --nav-bg-alpha: 0.6;
+  --nav-border: 15 15 30;
+  --nav-border-alpha: 0.08;
+  --nav-text: 22 24 29;
+  --nav-text-muted: 90 93 110;
+  --nav-btn-bg: 15 15 30;
+  --nav-btn-bg-alpha: 0.05;
+  --nav-btn-bg-hover-alpha: 0.09;
 }
 
 .dark {
@@ -45,10 +79,46 @@
 
   --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   --card-shadow-hover: 0 4px 14px rgba(0, 0, 0, 0.35);
+
+  /* Dark showcase — closer to the DesignCode reference: saturated,
+     glowing, higher contrast between glow and canvas. */
+  --showcase-bg: 10 10 24;
+  --showcase-surface: 255 255 255;
+  --showcase-surface-alpha: 0.05;
+  --showcase-border: 255 255 255;
+  --showcase-border-alpha: 0.09;
+  --showcase-glow-1: 168 85 247;
+  --showcase-glow-2: 249 115 22;
+  --showcase-glow-3: 59 130 246;
+  --showcase-glow-alpha: 0.4;
+  --showcase-cta-bg: 255 255 255;
+  --showcase-cta-text: 10 10 24;
+  --showcase-text: 255 255 255;
+  --showcase-text-muted: 154 160 184;
+
+  --nav-bg: 12 12 20;
+  --nav-bg-alpha: 0.55;
+  --nav-border: 255 255 255;
+  --nav-border-alpha: 0.1;
+  --nav-text: 255 255 255;
+  --nav-text-muted: 154 160 184;
+  --nav-btn-bg: 255 255 255;
+  --nav-btn-bg-alpha: 0.08;
+  --nav-btn-bg-hover-alpha: 0.14;
 }
 
 body {
   @apply bg-bg text-text;
+  /* .showcase-bg uses the width:100vw full-bleed trick to break the mesh
+     gradient out of the app's centered reading column. 100vw can include
+     scrollbar width in some browsers, and absolutely positioned
+     descendants still count toward a page's scrollable-overflow area even
+     though they don't affect layout sizing — the classic failure mode is a
+     hairline horizontal scrollbar appearing on pages that use this trick.
+     Guarding at the body level is simpler and safer than computing an
+     exact scrollbar-width offset, and the app has no legitimate reason to
+     scroll horizontally anywhere. */
+  overflow-x: hidden;
 }
 
 @layer components {
@@ -111,6 +181,117 @@ body {
   .prose-content th,
   .prose-content td {
     @apply border border-border px-3 py-2 text-left;
+  }
+
+  /* --- Showcase zone (Home hero + ProjectsGrid) ------------------------- */
+
+  .showcase {
+    position: relative;
+  }
+
+  /* Full-bleed mesh-gradient canvas. Breaks out of the app's centered
+     max-w-5xl reading column via the left-50%/-translate-x-50%/w-screen
+     trick, so the gradient reads edge-to-edge like a real marketing hero
+     instead of being boxed in. Sits behind content via z-index: -1, so the
+     nearest ancestor with position:relative (.showcase itself) must wrap it. */
+  .showcase-bg {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 100vw;
+    height: 100%;
+    transform: translateX(-50%);
+    z-index: -1;
+    pointer-events: none;
+    background-color: rgb(var(--showcase-bg));
+    background-image:
+      radial-gradient(ellipse 55% 45% at 18% 15%, rgb(var(--showcase-glow-1) / var(--showcase-glow-alpha)), transparent 70%),
+      radial-gradient(ellipse 50% 42% at 82% 12%, rgb(var(--showcase-glow-2) / var(--showcase-glow-alpha)), transparent 70%),
+      radial-gradient(ellipse 55% 48% at 50% 65%, rgb(var(--showcase-glow-3) / var(--showcase-glow-alpha)), transparent 70%);
+    filter: blur(60px);
+    transition: background-color 0.3s ease;
+  }
+
+  .showcase-pill {
+    background: rgb(var(--showcase-surface) / var(--showcase-surface-alpha));
+    border: 1px solid rgb(var(--showcase-border) / var(--showcase-border-alpha));
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    color: rgb(var(--showcase-text-muted));
+  }
+
+  .showcase-card {
+    background: rgb(var(--showcase-surface) / var(--showcase-surface-alpha));
+    border: 1px solid rgb(var(--showcase-border) / var(--showcase-border-alpha));
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    color: rgb(var(--showcase-text));
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  }
+
+  .showcase-card:hover {
+    border-color: rgb(var(--showcase-border) / calc(var(--showcase-border-alpha) * 2.8));
+    box-shadow: 0 16px 36px rgb(var(--showcase-glow-3) / 0.16);
+  }
+
+  .showcase-muted {
+    color: rgb(var(--showcase-text-muted));
+  }
+
+  .showcase-cta {
+    background: rgb(var(--showcase-cta-bg));
+    color: rgb(var(--showcase-cta-text));
+  }
+
+  .showcase-cta-outline {
+    background: rgb(var(--showcase-surface) / var(--showcase-surface-alpha));
+    border: 1px solid rgb(var(--showcase-border) / calc(var(--showcase-border-alpha) * 2));
+    color: rgb(var(--showcase-text));
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .showcase-gradient-text {
+    background-image: linear-gradient(90deg, rgb(var(--showcase-glow-1)), rgb(var(--showcase-glow-2)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Per-card accent, cycled through the three glow families so a grid of
+     many cards gets variety without breaking the shared card structure. */
+  .showcase-accent-1 { color: rgb(var(--showcase-glow-1)); }
+  .showcase-accent-2 { color: rgb(var(--showcase-glow-2)); }
+  .showcase-accent-3 { color: rgb(var(--showcase-glow-3)); }
+  .showcase-accent-bg-1 { background: rgb(var(--showcase-glow-1) / 0.14); }
+  .showcase-accent-bg-2 { background: rgb(var(--showcase-glow-2) / 0.14); }
+  .showcase-accent-bg-3 { background: rgb(var(--showcase-glow-3) / 0.14); }
+
+  /* --- Navbar frosted glass, adaptive to light/dark --------------------- */
+  .nav-glass {
+    background: rgb(var(--nav-bg) / var(--nav-bg-alpha));
+    border: 1px solid rgb(var(--nav-border) / var(--nav-border-alpha));
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    color: rgb(var(--nav-text));
+  }
+
+  .nav-glass-btn {
+    background: rgb(var(--nav-btn-bg) / var(--nav-btn-bg-alpha));
+    border: 1px solid rgb(var(--nav-border) / calc(var(--nav-border-alpha) * 1.3));
+    transition: background-color 0.2s ease;
+  }
+
+  .nav-glass-btn:hover {
+    background: rgb(var(--nav-btn-bg) / var(--nav-btn-bg-hover-alpha));
+  }
+
+  .nav-text {
+    color: rgb(var(--nav-text));
+  }
+
+  .nav-text-muted {
+    color: rgb(var(--nav-text-muted));
   }
 }
 
