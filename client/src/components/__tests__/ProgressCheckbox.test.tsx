@@ -3,14 +3,24 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ProgressCheckbox } from '../ProgressCheckbox'
 import { ProgressProvider } from '../../context/ProgressContext'
+import { AccountProvider } from '../../context/AccountContext'
 
 const STORAGE_KEY = 'resource-hub-progress'
 
+// ProgressProvider now reads useAccount() internally to decide whether to
+// sync with the server (signed in) or stay localStorage-only (signed out/
+// checking) — see context/ProgressContext.tsx. AccountProvider's initial
+// session check hits the network and settles to 'signed-out' in this test
+// environment (no server running), which exercises the exact same
+// localStorage-only code path these tests were already written against —
+// so no behavioral assertions below needed to change, only the wrapper.
 function renderCheckbox() {
   return render(
-    <ProgressProvider>
-      <ProgressCheckbox type="note" slug="binary-search" />
-    </ProgressProvider>,
+    <AccountProvider>
+      <ProgressProvider>
+        <ProgressCheckbox type="note" slug="binary-search" />
+      </ProgressProvider>
+    </AccountProvider>,
   )
 }
 
@@ -59,11 +69,13 @@ describe('ProgressCheckbox', () => {
     let parentClicked = false
 
     render(
-      <ProgressProvider>
-        <div onClick={() => (parentClicked = true)}>
-          <ProgressCheckbox type="note" slug="binary-search" />
-        </div>
-      </ProgressProvider>,
+      <AccountProvider>
+        <ProgressProvider>
+          <div onClick={() => (parentClicked = true)}>
+            <ProgressCheckbox type="note" slug="binary-search" />
+          </div>
+        </ProgressProvider>
+      </AccountProvider>,
     )
 
     await user.click(screen.getByRole('button'))

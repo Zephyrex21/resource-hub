@@ -1,6 +1,8 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import ThemeToggle from './ThemeToggle'
 import { useUIStore } from '../store/uiStore'
+import { useAccount } from '../context/AccountContext'
+import { useToast } from '../context/ToastContext'
 
 const links = [
   { to: '/notes', label: 'Notes' },
@@ -17,6 +19,15 @@ const links = [
 export default function Navbar() {
   const onSearchClick = useUIStore((s) => s.openCommandPalette)
   const backendWaking = useUIStore((s) => s.backendWaking)
+  const { status, user, signOut } = useAccount()
+  const { showToast } = useToast()
+  const navigate = useNavigate()
+
+  async function handleSignOut() {
+    await signOut()
+    showToast('Signed out')
+    navigate('/')
+  }
 
   return (
     <header
@@ -67,6 +78,47 @@ export default function Navbar() {
             <path d="m21 21-4.3-4.3" />
           </svg>
         </button>
+        {status === 'signed-in' && user ? (
+          <>
+            <div className="hidden items-center gap-2 sm:flex">
+              <span className="nav-text-muted text-xs">Hi, {user.name.split(' ')[0]}</span>
+              <button onClick={handleSignOut} className="nav-glass-btn nav-text-muted rounded-full px-3 py-1.5 text-xs">
+                Sign out
+              </button>
+            </div>
+            <button
+              onClick={handleSignOut}
+              aria-label="Sign out"
+              className="nav-glass-btn nav-text-muted flex h-8 w-8 items-center justify-center rounded-full sm:hidden"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <path d="m16 17 5-5-5-5" />
+                <path d="M21 12H9" />
+              </svg>
+            </button>
+          </>
+        ) : status === 'signed-out' ? (
+          <>
+            <NavLink
+              to="/signin"
+              className="nav-glass-btn nav-text-muted hidden rounded-full px-3 py-1.5 text-xs sm:inline-block"
+            >
+              Sign in
+            </NavLink>
+            <NavLink
+              to="/signin"
+              aria-label="Sign in"
+              className="nav-glass-btn nav-text-muted flex h-8 w-8 items-center justify-center rounded-full sm:hidden"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                <path d="M10 17l5-5-5-5" />
+                <path d="M15 12H3" />
+              </svg>
+            </NavLink>
+          </>
+        ) : null}
         <ThemeToggle />
       </div>
     </header>

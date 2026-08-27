@@ -5,22 +5,10 @@ import { requireAdmin } from '../middleware/requireAdmin.js'
 import { authLimiter } from '../middleware/rateLimiters.js'
 import { validate } from '../middleware/validate.js'
 import { loginSchema } from '../schemas/authSchema.js'
+import { buildCookieOptions } from '../utils/cookieOptions.js'
 
 const router = Router()
-
-const isProduction = process.env.NODE_ENV === 'production'
-
-const COOKIE_OPTS = {
-  httpOnly: true,
-  // In dev, client and server share a site (different localhost ports) so
-  // 'lax' works fine. In production they're on different domains entirely
-  // (e.g. vercel.app + onrender.com), which requires 'none' — and browsers
-  // only accept sameSite:'none' when secure:true (HTTPS), which both
-  // Vercel and Render provide by default.
-  sameSite: isProduction ? 'none' : 'lax',
-  secure: isProduction,
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-}
+const ADMIN_COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000 // 7 days
 
 router.post('/login', authLimiter, validate(loginSchema), async (req, res, next) => {
   try {
@@ -43,8 +31,8 @@ router.post('/login', authLimiter, validate(loginSchema), async (req, res, next)
       return res.status(401).json({ error: 'Invalid email or password' })
     }
 
-    const token = signToken({ email })
-    res.cookie('token', token, COOKIE_OPTS)
+    const token = signToken({ type: 'admin', email })
+    res.cookie('token', token, buildCookieOptions(ADMIN_COOKIE_MAX_AGE))
     res.json({ email })
   } catch (err) {
     next(err)
@@ -52,7 +40,7 @@ router.post('/login', authLimiter, validate(loginSchema), async (req, res, next)
 })
 
 router.post('/logout', (req, res) => {
-  const { maxAge, ...clearOpts } = COOKIE_OPTS
+  const { maxAge, ...clearOpts } = buildCookieOptions(ADMIN_COOKIE_MAX_AGE)
   res.clearCookie('token', clearOpts)
   res.status(204).end()
 })

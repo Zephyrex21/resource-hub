@@ -9,6 +9,7 @@ import tipsRoutes from './routes/tips.routes.js'
 import projectsRoutes from './routes/projects.routes.js'
 import metaRoutes from './routes/meta.routes.js'
 import authRoutes from './routes/auth.routes.js'
+import accountRoutes from './routes/account.routes.js'
 import uploadRoutes from './routes/upload.routes.js'
 import searchRoutes from './routes/search.routes.js'
 import statsRoutes from './routes/stats.routes.js'
@@ -70,6 +71,7 @@ app.use('/api/v1/tips', tipsRoutes)
 app.use('/api/v1/projects', projectsRoutes)
 app.use('/api/v1/meta', metaRoutes)
 app.use('/api/v1/auth', authRoutes)
+app.use('/api/v1/account', accountRoutes)
 app.use('/api/v1/upload', uploadRoutes)
 app.use('/api/v1/search', searchRoutes)
 app.use('/api/v1/stats', statsRoutes)

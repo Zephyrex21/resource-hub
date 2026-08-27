@@ -64,6 +64,32 @@ export interface AdminSession {
   email: string
 }
 
+export interface Account {
+  id: string
+  name: string
+  email: string
+  avatarUrl: string
+}
+
+export type ProgressContentType = 'note' | 'tip'
+export type SavedContentType = 'note' | 'tip' | 'project'
+
+export interface ProgressItem {
+  _id: string
+  contentType: ProgressContentType
+  slug: string
+  createdAt: string
+}
+
+export interface SavedItemRecord {
+  _id: string
+  contentType: SavedContentType
+  slug: string
+  title: string
+  subtitle: string
+  createdAt: string
+}
+
 export interface SearchResults {
   notes: Note[]
   tips: Tip[]
@@ -167,11 +193,30 @@ export const incrementDownload = (slug: string) =>
 export const incrementView = (resource: 'notes' | 'tips' | 'projects', slug: string) =>
   request<{ viewCount: number }>(`/${resource}/${slug}/view`, { method: 'POST' })
 
-// --- Auth ---
+// --- Auth (admin) ---
 export const login = (email: string, password: string) =>
   request<AdminSession>('/auth/login', { method: 'POST', ...jsonBody({ email, password }) })
 export const logout = () => request<void>('/auth/logout', { method: 'POST' })
 export const getMe = () => request<AdminSession>('/auth/me')
+
+// --- Account (regular users — separate system from admin auth above) ---
+export const registerAccount = (name: string, email: string, password: string) =>
+  request<Account>('/account/register', { method: 'POST', ...jsonBody({ name, email, password }) })
+export const loginAccount = (email: string, password: string) =>
+  request<Account>('/account/login', { method: 'POST', ...jsonBody({ email, password }) })
+export const logoutAccount = () => request<void>('/account/logout', { method: 'POST' })
+export const getAccount = () => request<Account>('/account/me')
+
+export const getProgress = () => request<ProgressItem[]>('/account/progress')
+export const toggleProgress = (contentType: ProgressContentType, slug: string) =>
+  request<{ completed: boolean }>('/account/progress', { method: 'POST', ...jsonBody({ contentType, slug }) })
+
+export const getSavedItems = () => request<SavedItemRecord[]>('/account/saved')
+export const toggleSavedItem = (contentType: SavedContentType, slug: string, title: string, subtitle: string) =>
+  request<{ saved: boolean }>('/account/saved', {
+    method: 'POST',
+    ...jsonBody({ contentType, slug, title, subtitle }),
+  })
 
 // --- Writes (admin only) ---
 export const createNote = (data: Partial<Note>) =>

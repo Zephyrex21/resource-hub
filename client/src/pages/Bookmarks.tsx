@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useBookmarks, type BookmarkType } from '../context/BookmarksContext'
+import { useAccount } from '../context/AccountContext'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { GlassCard } from '../components/ui/Card'
 import { EmptyState } from '../components/ui/StateViews'
@@ -13,6 +14,7 @@ const typeConfig: Record<BookmarkType, { label: string; path: string; accent: st
 export default function Bookmarks() {
   usePageTitle('Saved')
   const { bookmarks, removeBookmark } = useBookmarks()
+  const { status } = useAccount()
 
   if (bookmarks.length === 0) {
     return (
@@ -35,7 +37,17 @@ export default function Bookmarks() {
       <div>
         <h1 className="font-display text-3xl font-bold">Saved</h1>
         <p className="mt-1 text-sm text-muted">
-          Stored in this browser only — clearing site data will clear these too.
+          {status === 'signed-in' ? (
+            'Synced to your account — available on any device you sign in on.'
+          ) : (
+            <>
+              Stored in this browser only — clearing site data will clear these too.{' '}
+              <Link to="/signin" className="font-medium text-accent">
+                Sign in
+              </Link>{' '}
+              to sync across devices.
+            </>
+          )}
         </p>
       </div>
 

@@ -10,6 +10,8 @@ import ProjectsGrid from './pages/ProjectsGrid'
 import About from './pages/About'
 import WhatsNew from './pages/WhatsNew'
 import Bookmarks from './pages/Bookmarks'
+import SignIn from './pages/SignIn'
+import SignUp from './pages/SignUp'
 import NotFound from './pages/NotFound'
 
 // Code-split heavier, less-visited routes out of the main bundle:
@@ -56,6 +58,8 @@ export default function App() {
         <Route path="/about" element={<About />} />
         <Route path="/whats-new" element={<WhatsNew />} />
         <Route path="/bookmarks" element={<Bookmarks />} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<SignUp />} />
         <Route
           path="/admin/login"
           element={

@@ -6,6 +6,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import App from './App'
 import { ThemeProvider } from './context/ThemeContext'
 import { AuthProvider } from './context/AuthContext'
+import { AccountProvider } from './context/AccountContext'
 import { ToastProvider } from './context/ToastContext'
 import { BookmarksProvider } from './context/BookmarksContext'
 import { ProgressProvider } from './context/ProgressContext'
@@ -21,13 +22,15 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <MotionConfig reducedMotion="user">
             <ThemeProvider>
               <AuthProvider>
-                <ToastProvider>
-                  <BookmarksProvider>
-                    <ProgressProvider>
-                      <App />
-                    </ProgressProvider>
-                  </BookmarksProvider>
-                </ToastProvider>
+                <AccountProvider>
+                  <ToastProvider>
+                    <BookmarksProvider>
+                      <ProgressProvider>
+                        <App />
+                      </ProgressProvider>
+                    </BookmarksProvider>
+                  </ToastProvider>
+                </AccountProvider>
               </AuthProvider>
             </ThemeProvider>
           </MotionConfig>
