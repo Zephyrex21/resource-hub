@@ -81,7 +81,9 @@ export default function Navbar() {
         {status === 'signed-in' && user ? (
           <>
             <div className="hidden items-center gap-2 sm:flex">
-              <span className="nav-text-muted text-xs">Hi, {user.name.split(' ')[0]}</span>
+              <NavLink to="/achievements" className="nav-text-muted text-xs hover:text-[rgb(var(--nav-text))]">
+                Hi, {user.name.split(' ')[0]}
+              </NavLink>
               <button onClick={handleSignOut} className="nav-glass-btn nav-text-muted rounded-full px-3 py-1.5 text-xs">
                 Sign out
               </button>

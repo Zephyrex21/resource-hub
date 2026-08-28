@@ -19,13 +19,14 @@ beforeAll(() => {
 })
 
 describe('createAccountController', () => {
-  let User, Progress, SavedItem, ctrl, next
+  let User, Progress, SavedItem, ActivityLog, ctrl, next
 
   beforeEach(() => {
     User = { findOne: vi.fn(), create: vi.fn(), findById: vi.fn() }
     Progress = { find: vi.fn(), findOne: vi.fn(), create: vi.fn(), deleteOne: vi.fn() }
     SavedItem = { find: vi.fn(), findOne: vi.fn(), create: vi.fn(), deleteOne: vi.fn() }
-    ctrl = createAccountController({ User, Progress, SavedItem })
+    ActivityLog = { find: vi.fn(), updateOne: vi.fn() }
+    ctrl = createAccountController({ User, Progress, SavedItem, ActivityLog })
     next = vi.fn()
   })
 
@@ -127,21 +128,27 @@ describe('createAccountController', () => {
   })
 
   describe('toggleProgress', () => {
-    it('marks complete when no record exists yet', async () => {
+    it('marks complete when no record exists yet, and logs today as an active day', async () => {
       Progress.findOne.mockResolvedValue(null)
       const res = mockRes()
       await ctrl.toggleProgress({ userId: 'u1', body: { contentType: 'note', slug: 'dbms-normalization' } }, res, next)
       expect(Progress.create).toHaveBeenCalledWith({ userId: 'u1', contentType: 'note', slug: 'dbms-normalization' })
+      expect(ActivityLog.updateOne).toHaveBeenCalledTimes(1)
+      const [filter, update, opts] = ActivityLog.updateOne.mock.calls[0]
+      expect(filter.userId).toBe('u1')
+      expect(opts).toEqual({ upsert: true })
+      expect(update.$setOnInsert.date).toMatch(/^\d{4}-\d{2}-\d{2}$/)
       expect(res.status).toHaveBeenCalledWith(201)
       expect(res.json).toHaveBeenCalledWith({ completed: true })
     })
 
-    it('unmarks (toggles off) when a record already exists', async () => {
+    it('unmarks (toggles off) when a record already exists, and does NOT log activity', async () => {
       Progress.findOne.mockResolvedValue({ _id: 'p1' })
       const res = mockRes()
       await ctrl.toggleProgress({ userId: 'u1', body: { contentType: 'note', slug: 'dbms-normalization' } }, res, next)
       expect(Progress.deleteOne).toHaveBeenCalledWith({ _id: 'p1' })
       expect(Progress.create).not.toHaveBeenCalled()
+      expect(ActivityLog.updateOne).not.toHaveBeenCalled()
       expect(res.json).toHaveBeenCalledWith({ completed: false })
     })
 
@@ -149,6 +156,26 @@ describe('createAccountController', () => {
       Progress.findOne.mockResolvedValue(null)
       await ctrl.toggleProgress({ userId: 'u1', body: { contentType: 'tip', slug: 'git-rebase' } }, mockRes(), next)
       expect(Progress.findOne).toHaveBeenCalledWith({ userId: 'u1', contentType: 'tip', slug: 'git-rebase' })
+    })
+  })
+
+  describe('getStreak', () => {
+    it('computes current/longest streak from the user\'s activity log', async () => {
+      ActivityLog.find.mockReturnValue({ lean: vi.fn().mockResolvedValue([{ date: '2026-08-27' }, { date: '2026-08-26' }]) })
+      const res = mockRes()
+      await ctrl.getStreak({ userId: 'u1' }, res, next)
+      expect(ActivityLog.find).toHaveBeenCalledWith({ userId: 'u1' }, 'date')
+      const payload = res.json.mock.calls[0][0]
+      expect(payload.activeDates.sort()).toEqual(['2026-08-26', '2026-08-27'])
+      expect(typeof payload.current).toBe('number')
+      expect(typeof payload.longest).toBe('number')
+    })
+
+    it('returns zeros for a user with no activity yet', async () => {
+      ActivityLog.find.mockReturnValue({ lean: vi.fn().mockResolvedValue([]) })
+      const res = mockRes()
+      await ctrl.getStreak({ userId: 'u1' }, res, next)
+      expect(res.json).toHaveBeenCalledWith({ current: 0, longest: 0, activeDates: [] })
     })
   })
 

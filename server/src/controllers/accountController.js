@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs'
 import { signToken } from '../utils/jwt.js'
 import { buildCookieOptions } from '../utils/cookieOptions.js'
+import { computeStreaks, todayUTC } from '../utils/streak.js'
 
 // Longer than the admin session (7d) on purpose — this is a personal
 // "remember me" cookie for a return visitor, not a privileged write
@@ -19,7 +20,7 @@ function toPublicUser(user) {
 // Models are injected (not imported directly) so this can be unit-tested
 // with plain mock objects, the same way controllers/crudFactory.js is —
 // no real MongoDB connection needed to test the actual business logic.
-export function createAccountController({ User, Progress, SavedItem }) {
+export function createAccountController({ User, Progress, SavedItem, ActivityLog }) {
   return {
     async register(req, res, next) {
       try {
@@ -94,10 +95,31 @@ export function createAccountController({ User, Progress, SavedItem }) {
         const existing = await Progress.findOne({ userId: req.userId, contentType, slug })
         if (existing) {
           await Progress.deleteOne({ _id: existing._id })
+          // Un-completing something isn't evidence of study, so it does
+          // NOT remove today's activity log entry even if this was the
+          // only completion today — once a day is logged, it stays
+          // logged. Avoids "was this the only thing done today" reference
+          // counting for a case that doesn't really matter in practice.
           return res.json({ completed: false })
         }
         await Progress.create({ userId: req.userId, contentType, slug })
+        await ActivityLog.updateOne(
+          { userId: req.userId, date: todayUTC() },
+          { $setOnInsert: { userId: req.userId, date: todayUTC() } },
+          { upsert: true },
+        )
         res.status(201).json({ completed: true })
+      } catch (err) {
+        next(err)
+      }
+    },
+
+    async getStreak(req, res, next) {
+      try {
+        const logs = await ActivityLog.find({ userId: req.userId }, 'date').lean()
+        const dates = logs.map((l) => l.date)
+        const { current, longest } = computeStreaks(dates)
+        res.json({ current, longest, activeDates: dates })
       } catch (err) {
         next(err)
       }

@@ -90,6 +90,12 @@ export interface SavedItemRecord {
   createdAt: string
 }
 
+export interface Streak {
+  current: number
+  longest: number
+  activeDates: string[]
+}
+
 export interface SearchResults {
   notes: Note[]
   tips: Tip[]
@@ -217,6 +223,8 @@ export const toggleSavedItem = (contentType: SavedContentType, slug: string, tit
     method: 'POST',
     ...jsonBody({ contentType, slug, title, subtitle }),
   })
+
+export const getStreak = () => request<Streak>('/account/streak')
 
 // --- Writes (admin only) ---
 export const createNote = (data: Partial<Note>) =>

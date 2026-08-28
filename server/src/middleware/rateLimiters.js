@@ -42,3 +42,22 @@ export const authLimiter = rateLimit({
   legacyHeaders: false,
   handler: jsonHandler('Too many login attempts — please wait a few minutes and try again.'),
 })
+
+// A SEPARATE instance (not the same object as authLimiter) for regular
+// user-account register/login. express-rate-limit's default store is an
+// in-memory counter per limiter *instance*, keyed by IP — reusing
+// authLimiter here would mean admin login and account signup/login share
+// one combined 5-request budget per IP. In practice that means testing
+// the account signup flow a few times (entirely normal, expected traffic)
+// can silently exhaust the shared budget and then reject a subsequent
+// *correct* admin login with 429, which looks exactly like "login is
+// broken" despite the admin credentials being fine the whole time — this
+// is not a hypothetical, it was reproduced while building this. Same
+// limits, independent counters, because these are two unrelated systems.
+export const accountAuthLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: jsonHandler('Too many attempts — please wait a few minutes and try again.'),
+})

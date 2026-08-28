@@ -2,10 +2,11 @@ import { Router } from 'express'
 import User from '../models/User.js'
 import Progress from '../models/Progress.js'
 import SavedItem from '../models/SavedItem.js'
+import ActivityLog from '../models/ActivityLog.js'
 import { createAccountController } from '../controllers/accountController.js'
 import { requireUser } from '../middleware/requireUser.js'
 import { validate } from '../middleware/validate.js'
-import { authLimiter } from '../middleware/rateLimiters.js'
+import { accountAuthLimiter } from '../middleware/rateLimiters.js'
 import {
   registerSchema,
   userLoginSchema,
@@ -14,13 +15,13 @@ import {
 } from '../schemas/accountSchema.js'
 
 const router = Router()
-const ctrl = createAccountController({ User, Progress, SavedItem })
+const ctrl = createAccountController({ User, Progress, SavedItem, ActivityLog })
 
-// authLimiter is shared with admin login — separate test files each get
-// their own fresh module instance under Vitest's per-file isolation, so
-// this doesn't eat into the admin login tests' budget (see auth.test.js).
-router.post('/register', authLimiter, validate(registerSchema), ctrl.register)
-router.post('/login', authLimiter, validate(userLoginSchema), ctrl.login)
+// A dedicated limiter instance, independent from the admin authLimiter —
+// see the comment on accountAuthLimiter in rateLimiters.js for why sharing
+// one was a real bug, not just a theoretical concern.
+router.post('/register', accountAuthLimiter, validate(registerSchema), ctrl.register)
+router.post('/login', accountAuthLimiter, validate(userLoginSchema), ctrl.login)
 router.post('/logout', ctrl.logout)
 router.get('/me', requireUser, ctrl.me)
 
@@ -29,5 +30,7 @@ router.post('/progress', requireUser, validate(progressToggleSchema), ctrl.toggl
 
 router.get('/saved', requireUser, ctrl.listSaved)
 router.post('/saved', requireUser, validate(savedToggleSchema), ctrl.toggleSaved)
+
+router.get('/streak', requireUser, ctrl.getStreak)
 
 export default router

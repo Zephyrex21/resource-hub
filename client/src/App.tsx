@@ -12,6 +12,7 @@ import WhatsNew from './pages/WhatsNew'
 import Bookmarks from './pages/Bookmarks'
 import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
+import Achievements from './pages/Achievements'
 import NotFound from './pages/NotFound'
 
 // Code-split heavier, less-visited routes out of the main bundle:
@@ -60,6 +61,7 @@ export default function App() {
         <Route path="/bookmarks" element={<Bookmarks />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/achievements" element={<Achievements />} />
         <Route
           path="/admin/login"
           element={
