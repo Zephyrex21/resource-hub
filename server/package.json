@@ -9,7 +9,6 @@
     "start": "node src/index.js",
     "test": "vitest run",
     "seed": "node src/seed.js",
-    "hash-password": "node src/utils/hashPassword.js",
     "import-notes": "node src/scripts/importNotes.js",
     "import-notes:dry-run": "node src/scripts/importNotes.js --dry-run",
     "clean-samples": "node src/scripts/removeSampleContent.js"

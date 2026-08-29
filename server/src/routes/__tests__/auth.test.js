@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeAll } from 'vitest'
-import bcrypt from 'bcryptjs'
 import request from 'supertest'
 
 const TEST_EMAIL = 'admin@test.local'
@@ -8,13 +7,13 @@ const TEST_PASSWORD = 'correct-horse-battery-staple'
 let app
 
 // Env vars must be set BEFORE app.js (and its route imports) are evaluated,
-// since the login handler reads process.env.ADMIN_EMAIL/ADMIN_PASSWORD_HASH
+// since the login handler reads process.env.ADMIN_EMAIL/ADMIN_PASSWORD
 // directly. A static top-level `import` would be hoisted ahead of this
 // setup, so app.js is imported dynamically inside beforeAll instead.
 beforeAll(async () => {
   process.env.JWT_SECRET = 'test-jwt-secret'
   process.env.ADMIN_EMAIL = TEST_EMAIL
-  process.env.ADMIN_PASSWORD_HASH = await bcrypt.hash(TEST_PASSWORD, 10)
+  process.env.ADMIN_PASSWORD = TEST_PASSWORD
 
   app = (await import('../../app.js')).default
 })

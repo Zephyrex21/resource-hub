@@ -338,15 +338,12 @@ Add these to `server/.env`:
 ```bash
 JWT_SECRET=any-long-random-string-you-make-up
 ADMIN_EMAIL=you@example.com
+ADMIN_PASSWORD=choose_a_password
 ```
 
-Then generate your password hash — from `server/`:
-
-```bash
-npm run hash-password -- "yourChosenPassword"
-```
-
-Copy the printed `ADMIN_PASSWORD_HASH=...` line into `server/.env`, then restart the server.
+That's it — no hash to generate. This is a direct plaintext comparison, deliberate for a
+single-admin panel guarded by an env file that already holds equally sensitive values
+(`MONGODB_URI`, `JWT_SECRET`). Restart the server after adding these.
 
 **Optional — real file uploads.** By default the admin panel's "Upload file" mode will show a
 clear error ("File storage is not configured…") until you connect free storage. "Paste URL"
@@ -563,7 +560,7 @@ How they avoid needing a real database:
   controller tests use a **mocked** Mongoose model (`vi.fn()`), not a real one.
 - Route-level tests (`auth`, `ask`, `health`) hit the real Express app via `supertest`, but
   only cover endpoints/paths that don't require touching the database — login checks
-  `ADMIN_EMAIL`/`ADMIN_PASSWORD_HASH` env vars directly (no DB involved at all), and the Ask
+  `ADMIN_EMAIL`/`ADMIN_PASSWORD` env vars directly (no DB involved at all), and the Ask
   AI tests only cover the validation/not-configured paths, which return before any DB or
   Groq call happens.
 - **Not covered**: the actual Notes/Tips/Projects list/get endpoints against a real
@@ -667,7 +664,11 @@ the redesign all run on your existing MongoDB connection.
 - **Logged in but immediately bounced back to `/admin/login`** — check that `JWT_SECRET` is
   set in `server/.env` and that you restarted the server after editing it.
 - **"Admin credentials are not configured" on login** — you're missing `ADMIN_EMAIL` or
-  `ADMIN_PASSWORD_HASH` in `server/.env`, or forgot to restart the server after adding them.
+  `ADMIN_PASSWORD` in `server/.env`, or forgot to restart the server after adding them.
+- **"Invalid email or password" despite typing it correctly** — if you ever set
+  `ADMIN_PASSWORD` via a shell `export`/`source` instead of letting dotenv load `.env`
+  directly, avoid `$` and other shell-special characters in the password — the shell can
+  silently mangle them before the app ever sees the value.
 
 ## Cost check
 

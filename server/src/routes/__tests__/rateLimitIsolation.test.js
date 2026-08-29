@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeAll } from 'vitest'
-import bcrypt from 'bcryptjs'
 import request from 'supertest'
 
 const TEST_EMAIL = 'admin@test.local'
@@ -10,7 +9,7 @@ let app
 beforeAll(async () => {
   process.env.JWT_SECRET = 'test-jwt-secret'
   process.env.ADMIN_EMAIL = TEST_EMAIL
-  process.env.ADMIN_PASSWORD_HASH = await bcrypt.hash(TEST_PASSWORD, 10)
+  process.env.ADMIN_PASSWORD = TEST_PASSWORD
 
   app = (await import('../../app.js')).default
 })
