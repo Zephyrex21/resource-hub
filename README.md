@@ -3,6 +3,29 @@
 [![CI](https://github.com/<owner>/<repo>/actions/workflows/ci.yml/badge.svg)](https://github.com/<owner>/<repo>/actions/workflows/ci.yml)
 _(Swap `<owner>/<repo>` above for your actual GitHub path once this is pushed — the badge will start resolving after the first CI run.)_
 
+## Recent updates (accounts, gamification, and AI study tools)
+
+- **Real user accounts** — separate entirely from the site admin's own login (different
+  cookie, different DB collection, different middleware). Sign up / sign in, and Notes/Tips
+  progress + Saved bookmarks sync to the account instead of living in localStorage only.
+  Signing out doesn't lose anonymous-browsing behavior — everything still works
+  localStorage-only if you never create an account.
+- **Streaks, XP, and badges** — a real daily-activity log powers current/longest streak
+  calculation (a pure, thoroughly unit-tested function, not a fragile timestamp comparison);
+  XP and per-subject completion are derived entirely client-side from data already being
+  fetched, no extra backend calls. New `/achievements` page with a GitHub-style contribution
+  heatmap.
+- **AI-generated quizzes and "Explain Differently"** on every Note and Tip — a 5-question
+  auto-generated quiz (cached until you explicitly regenerate it) and an on-demand
+  alternate explanation (always fresh, never cached — the point is a genuinely different
+  angle, not the same text again). Both work on Notes despite Notes being file-based
+  (PDF/DOCX): the server now extracts and caches real text from the file the first time
+  either feature is used, rather than only having a title/description to work with.
+- **Admin login now uses a direct password comparison, not a bcrypt hash** — deliberate
+  trade-off for a single-admin credential living in an env file that already holds equally
+  sensitive values (`MONGODB_URI`, `JWT_SECRET`). Uses a timing-safe comparison rather than
+  `===`, so this isn't a naive downgrade. See `server/.env.example` for the full rationale.
+
 ## Recent updates (Phase 6/7 — takeuforward-style redesign + Ask AI)
 
 Everything below supersedes the design details described further down this README (those

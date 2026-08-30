@@ -30,6 +30,7 @@ export interface Tip {
   summary: string
   contentMarkdown: string
   fileUrl: string
+  fileType: 'pdf' | 'docx'
   coverImageUrl: string
   viewCount: number
   createdAt: string
@@ -95,6 +96,15 @@ export interface Streak {
   longest: number
   activeDates: string[]
 }
+
+export interface QuizQuestion {
+  question: string
+  options: string[]
+  correctIndex: number
+  explanation: string
+}
+
+export type AIContentType = 'note' | 'tip'
 
 export interface SearchResults {
   notes: Note[]
@@ -225,6 +235,14 @@ export const toggleSavedItem = (contentType: SavedContentType, slug: string, tit
   })
 
 export const getStreak = () => request<Streak>('/account/streak')
+
+export const getQuiz = (contentType: AIContentType, slug: string, regenerate = false) =>
+  request<{ quiz: QuizQuestion[]; cached: boolean }>(
+    `/quiz/${contentType}/${slug}${regenerate ? '?regenerate=true' : ''}`,
+  )
+
+export const explainDifferently = (contentType: AIContentType, slug: string) =>
+  request<{ explanation: string }>(`/explain/${contentType}/${slug}`, { method: 'POST' })
 
 // --- Writes (admin only) ---
 export const createNote = (data: Partial<Note>) =>

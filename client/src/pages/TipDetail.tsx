@@ -17,6 +17,7 @@ import { FilePreview } from '../components/FilePreview'
 import { TableOfContents } from '../components/TableOfContents'
 import { ReadingProgressBar } from '../components/ReadingProgressBar'
 import { RelatedContent } from '../components/RelatedContent'
+import { AIStudyTools } from '../components/AIStudyTools'
 import { Loading, ErrorState } from '../components/ui/StateViews'
 import { estimateReadingTime } from '../lib/readingTime'
 import { ProgressCheckbox } from '../components/ProgressCheckbox'
@@ -109,6 +110,8 @@ export default function TipDetail() {
           <FilePreview fileUrl={tip.fileUrl} />
         </>
       )}
+
+      <AIStudyTools contentType="tip" slug={tip.slug} />
 
       <RelatedContent type="tip" slug={tip.slug} />
     </div>

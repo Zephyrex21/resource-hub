@@ -59,6 +59,18 @@ describe('tipCreateSchema', () => {
     expect(tipCreateSchema.safeParse({ ...base, fileUrl: 'https://example.com/tip.pdf' }).success).toBe(true)
   })
 
+  it('defaults fileType to pdf when not specified, matching Note behavior', () => {
+    const result = tipCreateSchema.safeParse({ ...base, fileUrl: 'https://example.com/tip.docx' })
+    expect(result.success).toBe(true)
+    expect(result.data.fileType).toBe('pdf')
+  })
+
+  it('accepts an explicit docx fileType', () => {
+    const result = tipCreateSchema.safeParse({ ...base, fileUrl: 'https://example.com/tip.docx', fileType: 'docx' })
+    expect(result.success).toBe(true)
+    expect(result.data.fileType).toBe('docx')
+  })
+
   it('rejects a tip with neither contentMarkdown nor fileUrl', () => {
     const result = tipCreateSchema.safeParse(base)
     expect(result.success).toBe(false)

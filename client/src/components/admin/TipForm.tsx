@@ -50,6 +50,7 @@ export function TipForm({ meta, editing, onSaved, onCancelEdit }: Props) {
     }
 
     setSaving(true)
+    const lowerUrl = fileUrl.toLowerCase()
     const payload = {
       title,
       category,
@@ -57,6 +58,7 @@ export function TipForm({ meta, editing, onSaved, onCancelEdit }: Props) {
       tags: tags.split(',').map((t) => t.trim()).filter(Boolean),
       contentMarkdown,
       fileUrl,
+      fileType: (lowerUrl.endsWith('.docx') || lowerUrl.endsWith('.doc') ? 'docx' : 'pdf') as Tip['fileType'],
     }
 
     try {

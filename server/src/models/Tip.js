@@ -13,8 +13,17 @@ const tipSchema = new mongoose.Schema(
     contentMarkdown: { type: String, default: '' },
     // Fallback: a PDF/DOC, same as Notes, for tips you haven't converted yet.
     fileUrl: { type: String, default: '' },
+    fileType: { type: String, enum: ['pdf', 'docx'], default: 'pdf' },
     coverImageUrl: { type: String, default: '' },
     viewCount: { type: Number, default: 0 },
+    // AI-feature fields — see Note.js for the select:false rationale.
+    extractedText: { type: String, default: '', select: false },
+    quiz: {
+      type: [{ question: String, options: [String], correctIndex: Number, explanation: String }],
+      default: [],
+      select: false,
+    },
+    quizGeneratedAt: { type: Date, select: false },
   },
   { timestamps: true },
 )

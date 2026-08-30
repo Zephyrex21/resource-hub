@@ -11,6 +11,7 @@ import { ShareButton } from '../components/ShareButton'
 import { BookmarkButton } from '../components/BookmarkButton'
 import { FilePreview } from '../components/FilePreview'
 import { RelatedContent } from '../components/RelatedContent'
+import { AIStudyTools } from '../components/AIStudyTools'
 import { Loading, ErrorState } from '../components/ui/StateViews'
 
 export default function NoteDetail() {
@@ -79,6 +80,8 @@ export default function NoteDetail() {
       </div>
 
       <FilePreview fileUrl={note.fileUrl} />
+
+      <AIStudyTools contentType="note" slug={note.slug} />
 
       <RelatedContent type="note" slug={note.slug} />
     </div>

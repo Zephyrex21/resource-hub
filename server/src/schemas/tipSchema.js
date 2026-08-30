@@ -18,6 +18,7 @@ const tipBaseSchema = z.object({
   // the create-time "always a string" case.
   contentMarkdown: z.string().optional(),
   fileUrl: z.string().optional(),
+  fileType: z.enum(['pdf', 'docx']).default('pdf'),
   coverImageUrl: z.string().trim().default(''),
 })
 

@@ -15,6 +15,7 @@ import searchRoutes from './routes/search.routes.js'
 import statsRoutes from './routes/stats.routes.js'
 import relatedRoutes from './routes/related.routes.js'
 import askRoutes from './routes/ask.routes.js'
+import aiRoutes from './routes/ai.routes.js'
 import { apiLimiter } from './middleware/rateLimiters.js'
 import { notFound, errorHandler } from './middleware/errorHandler.js'
 
@@ -77,6 +78,7 @@ app.use('/api/v1/search', searchRoutes)
 app.use('/api/v1/stats', statsRoutes)
 app.use('/api/v1/related', relatedRoutes)
 app.use('/api/v1/ask', askRoutes)
+app.use('/api/v1', aiRoutes)
 
 app.use(notFound)
 app.use(errorHandler)
